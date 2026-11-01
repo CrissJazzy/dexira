@@ -1,28 +1,34 @@
 /**
  * CONTACT FORM CONFIGURATION: the one place to connect the contact form.
  *
- * Nothing here is invented. Until a real form service exists, leave the
- * values empty: the form on /contact/ stays disabled and says so, and no
- * email address is shown.
+ * Nothing here is invented. If no form service is configured, the form on /contact/
+ * stays disabled and says so, and no email address is shown.
  *
- * To connect a form service, choose ONE of:
+ * CURRENT SETUP: Netlify Forms (netlifyForms: true).
+ *   - Netlify finds the form by reading the built HTML on each deploy (it looks for
+ *     name="contact" and data-netlify="true" in dist/contact/index.html).
+ *   - Submissions go to the Netlify dashboard (Forms) and, once you add a notification
+ *     there, to an email address you choose. No email address is stored in this repository.
+ *   - After a successful submission visitors land on successPath.
+ *   - Keep formAction empty while netlifyForms is true.
+ *   - See the "Contact form (Netlify Forms)" section of README.md for the required
+ *     Netlify dashboard settings and how to test.
  *
- *   A) Any form-endpoint provider (Formspree, Basin, Getform, your own backend...):
- *      set formAction to the endpoint URL the provider gives you.
- *      The form POSTs name, email, subject and message to it. The provider
- *      handles the success page or redirect.
+ * ALTERNATIVE: any other form-endpoint provider (Formspree, Basin, Getform, your own
+ * backend...). Set netlifyForms to false and formAction to the endpoint URL the provider
+ * gives you. The form then POSTs name, email, subject and message to it, and the provider
+ * handles the success page or redirect. If you switch, update the Privacy Policy
+ * (src/pages/privacy.astro), which currently names Netlify.
  *
- *   B) Netlify Forms (once the site is deployed on Netlify):
- *      set netlifyForms to true. Netlify detects the form at deploy time.
- *      Leave formAction empty.
- *
- * To show a public email address on the contact page, set email to a real,
- * monitored address.
+ * To show a public email address on the contact page, set email to a real, monitored
+ * address. It is empty on purpose.
  */
 export const contactConfig = {
   formAction: '',
-  netlifyForms: false,
+  netlifyForms: true,
   email: '',
+  /** Where Netlify sends visitors after a successful submission. Must start and end with "/". */
+  successPath: '/contact/success/',
 };
 
 export const isContactFormConfigured = contactConfig.netlifyForms || contactConfig.formAction !== '';

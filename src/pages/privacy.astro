@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import LegalDoc from '../components/LegalDoc.astro';
-import { isContactFormConfigured } from '../data/contact-config';
+import { contactConfig, isContactFormConfigured } from '../data/contact-config';
 
 /**
  * MAINTAINER NOTES
@@ -18,11 +18,14 @@ import { isContactFormConfigured } from '../data/contact-config';
  * - This text is a general statement for a developing publication, not legal advice.
  *   Have it reviewed before relying on it, especially once data is collected.
  */
-const updated = '2026-11-01';
+const updated = '2026-11-02';
 
 // Newsletter. No provider has been chosen, so this stays empty. Do not guess a name.
 const newsletterProvider = '';
 const isNewsletterActive = Boolean(import.meta.env.PUBLIC_NEWSLETTER_ACTION);
+// Contact form. Netlify Forms is the only form service named in this policy. If the form is
+// ever moved to another provider, name that provider in the Contact form section below.
+const isNetlifyForm = contactConfig.netlifyForms;
 if (isNewsletterActive && newsletterProvider === '') {
   throw new Error(
     'privacy.astro: PUBLIC_NEWSLETTER_ACTION is set but newsletterProvider is empty. ' +
@@ -35,7 +38,9 @@ const practices = [
     name: 'Contact form',
     status: isContactFormConfigured ? 'Active' : 'Not active yet',
     note: isContactFormConfigured
-      ? 'Messages are sent to a form service chosen by DEXIRA.'
+      ? isNetlifyForm
+        ? 'Messages are received through Netlify Forms, a service of our hosting provider, Netlify.'
+        : 'Messages are sent to a form service chosen by DEXIRA.'
       : 'No form service is connected, so messages cannot be received.',
   },
   {
@@ -111,9 +116,23 @@ const practices = [
     <p>
       The contact form asks for your full name, email address, an enquiry subject and a message.
       {isContactFormConfigured
-        ? ' When you submit the form, these details are passed to a form service that DEXIRA uses to deliver messages to us. That service handles the data on our behalf and under its own terms.'
+        ? isNetlifyForm
+          ? ' When you submit the form, these details are sent to Netlify, our hosting provider, and processed by its Netlify Forms service on our behalf and under its own terms.'
+          : ' When you submit the form, these details are passed to a form service that DEXIRA uses to deliver messages to us. That service handles the data on our behalf and under its own terms.'
         : ' The form is not active yet, so no messages are being received. When it is switched on, the details you enter will be passed to a form service that delivers them to us, and this policy will name that service.'}
     </p>
+    {isContactFormConfigured && isNetlifyForm && (
+      <>
+        <p>
+          Netlify stores each submission so that we can read it in our Netlify account, and we may
+          also be notified of new messages by email. Netlify screens submissions for spam using a
+          spam-detection service, so a message may be checked by that service before it reaches
+          us. Netlify&rsquo;s own handling of data is described in its
+          <a href="https://www.netlify.com/privacy/">privacy statement</a>. We have not set a fixed
+          period for how long we keep messages (see Data retention below).
+        </p>
+      </>
+    )}
 
     <h2 id="newsletter">Newsletter</h2>
     <p>
@@ -184,7 +203,7 @@ const practices = [
     <p>
       DEXIRA is delivered through a hosting provider, which typically keeps technical logs such
       as IP addresses, browser details and the pages requested, in order to run and secure the
-      service. If we start a newsletter, an email service provider will also handle subscriber
+      service. {isContactFormConfigured && isNetlifyForm && 'That provider, Netlify, also receives and stores contact form messages, as described in the Contact form section. '}If we start a newsletter, an email service provider will also handle subscriber
       email addresses, as described in the Newsletter section. Some pages include links to share stories on other platforms. Following one takes
       you to that platform, which has its own privacy practices. Our pages may also link to
       external websites that we do not control. We are not responsible for how those sites

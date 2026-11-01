@@ -5,8 +5,9 @@ import SectionHeader from '../components/SectionHeader.astro';
 import { contactConfig, enquiryTypes, isContactFormConfigured } from '../data/contact-config';
 
 const netlify = contactConfig.netlifyForms;
-// Netlify Forms posts to the page itself; any other provider gets its endpoint as the action.
-const action = !netlify && contactConfig.formAction ? contactConfig.formAction : undefined;
+// Netlify Forms: after Netlify accepts a submission it sends the visitor to the success page.
+// Any other provider gets its own endpoint as the action.
+const action = netlify ? contactConfig.successPath : contactConfig.formAction || undefined;
 ---
 
 <Layout
@@ -52,13 +53,18 @@ const action = !netlify && contactConfig.formAction ? contactConfig.formAction :
           </p>
         )}
 
+        {isContactFormConfigured && (
+          <p class="status" id="form-error" role="alert" tabindex="-1" hidden></p>
+        )}
+
         <form
           id="contact-form"
           method="post"
           action={action}
           name={netlify ? 'contact' : undefined}
           data-netlify={netlify ? 'true' : undefined}
-          data-netlify-honeypot={netlify ? 'bot-field' : undefined}
+          netlify-honeypot={netlify ? 'bot-field' : undefined}
+          data-enhance={netlify ? 'netlify' : undefined}
           aria-describedby={!isContactFormConfigured ? 'form-notice' : undefined}
         >
           <fieldset class="fields" disabled={!isContactFormConfigured}>
@@ -86,27 +92,148 @@ const action = !netlify && contactConfig.formAction ? contactConfig.formAction :
               <label for="subject">Subject <span class="req" aria-hidden="true">*</span></label>
               <select id="subject" name="subject" required>
                 <option value="" disabled selected>Choose a subject</option>
-                {enquiryTypes.map((t) => <option value={t.value}>{t.label}</option>)}
+                {enquiryTypes.map((t) => <option value={t.label}>{t.label}</option>)}
               </select>
             </div>
 
             <div class="field">
               <label for="message">Message <span class="req" aria-hidden="true">*</span></label>
-              <textarea id="message" name="message" rows="7" required maxlength="5000"></textarea>
+              <textarea id="message" name="message" rows="7" required minlength="10" maxlength="5000"></textarea>
             </div>
 
             <p class="hint">
               By sending a message you agree that we may use the details you provide to reply to you.
+              {netlify && ' Messages are received through Netlify Forms, a service of our hosting provider, Netlify.'}
               See the <a href="/privacy/">Privacy Policy</a>.
             </p>
 
-            <button type="submit" class="btn">Send message</button>
+            <button type="submit" class="btn" id="submit-btn">Send message</button>
           </fieldset>
         </form>
       </div>
     </section>
   </div>
 </Layout>
+
+<script>
+  // Progressive enhancement for Netlify Forms.
+  // Without JavaScript the form still works: the browser posts it normally and Netlify sends
+  // the visitor to the success page. With JavaScript the message is sent in the background so
+  // that a failure can be reported on this page instead of leaving the visitor on an error screen.
+  // A success message is only ever shown after the server has accepted the submission.
+  const form = document.querySelector<HTMLFormElement>('#contact-form[data-enhance="netlify"]');
+
+  if (form) {
+    const errorBox = document.getElementById('form-error');
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const idleLabel = button?.textContent ?? 'Send message';
+    const SUBMITTED_KEY = 'dexira-contact-submitted';
+    const TIMEOUT_MS = 20000;
+
+    const host = window.location.hostname;
+    const isLocal =
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === '[::1]' ||
+      host.endsWith('.local') ||
+      /^(10\.\d{1,3}|192\.168|172\.(1[6-9]|2\d|3[01]))\.\d{1,3}\.\d{1,3}$/.test(host);
+
+    function showError(message: string) {
+      if (!errorBox) return;
+      errorBox.textContent = message;
+      errorBox.hidden = false;
+      errorBox.focus();
+    }
+
+    function hideError() {
+      if (!errorBox) return;
+      errorBox.hidden = true;
+      errorBox.textContent = '';
+    }
+
+    function setSending(sending: boolean) {
+      form!.setAttribute('aria-busy', String(sending));
+      if (button) {
+        button.disabled = sending;
+        button.textContent = sending ? 'Sending\u2026' : idleLabel;
+      }
+    }
+
+    // Browsers accept a field made only of spaces as "filled in", so check name and message too.
+    function hasBlankRequiredField(): boolean {
+      const checks: Array<[string, string]> = [
+        ['name', 'Please enter your full name.'],
+        ['message', 'Please enter your message.'],
+      ];
+      for (const [fieldName, text] of checks) {
+        const field = form!.elements.namedItem(fieldName) as
+          | HTMLInputElement
+          | HTMLTextAreaElement
+          | null;
+        if (field && field.value.trim() === '') {
+          field.setCustomValidity(text);
+          field.reportValidity();
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // Clear any custom message as soon as the visitor edits the field.
+    form.addEventListener('input', (event) => {
+      const field = event.target as HTMLInputElement | HTMLTextAreaElement | null;
+      if (field && typeof field.setCustomValidity === 'function') field.setCustomValidity('');
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      hideError();
+
+      if (hasBlankRequiredField()) return;
+
+      if (isLocal) {
+        // Netlify only receives messages on a deployed Netlify site. Never pretend otherwise.
+        showError(
+          'This form only sends messages from the live website. Nothing is sent while the site is running on your own device.',
+        );
+        return;
+      }
+
+      setSending(true);
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+      try {
+        const body = new URLSearchParams();
+        new FormData(form).forEach((value, key) => {
+          if (typeof value === 'string') body.append(key, value);
+        });
+
+        const response = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString(),
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error('Submission failed with status ' + response.status);
+
+        try {
+          sessionStorage.setItem(SUBMITTED_KEY, '1');
+        } catch {
+          // Storage can be blocked; the success page then relies on its other check.
+        }
+        window.location.assign(form.action);
+      } catch {
+        showError(
+          'Your message could not be sent. Please check your connection and try again in a moment. What you typed is still in the form.',
+        );
+        setSending(false);
+      } finally {
+        window.clearTimeout(timer);
+      }
+    });
+  }
+</script>
 
 <style>
   .page { padding-top: var(--s-6); padding-bottom: var(--s-12); }
@@ -157,6 +284,18 @@ const action = !netlify && contactConfig.formAction ? contactConfig.formAction :
   .fields[disabled] .field select,
   .fields[disabled] .field textarea { background: var(--c-surface); color: var(--c-muted); cursor: not-allowed; }
 
+  .status {
+    --c-error: #b42318;
+    margin-bottom: var(--s-6);
+    padding: var(--s-4);
+    background: #fef3f2;
+    border-left: 3px solid var(--c-error);
+    font-size: var(--t-sm);
+    color: var(--c-ink);
+  }
+  .status[hidden] { display: none; }
+  .status:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+
   .hint { margin-bottom: var(--s-6); font-size: var(--t-xs); color: var(--c-muted); }
   .hint a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
 
@@ -174,6 +313,7 @@ const action = !netlify && contactConfig.formAction ? contactConfig.formAction :
   }
   .btn:hover { background: var(--c-accent-dark); }
   .btn:disabled { background: var(--c-muted); cursor: not-allowed; }
+  .btn:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
 
   .trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

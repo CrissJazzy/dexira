@@ -23,6 +23,7 @@ This repository contains the frontend only. Article content is currently **place
 - [SEO and indexing behaviour](#seo-and-indexing-behaviour)
 - [Placeholder content warning](#placeholder-content-warning)
 - [Newsletter and contact form status](#newsletter-and-contact-form-status)
+- [Contact form (Netlify Forms)](#contact-form-netlify-forms)
 - [Future WordPress integration](#future-wordpress-integration)
 - [Critical technical note: the satteri override](#critical-technical-note-the-satteri-override)
 - [Working rules](#working-rules)
@@ -35,7 +36,7 @@ This repository contains the frontend only. Article content is currently **place
 | Article content | Placeholder content only |
 | Search | Implemented (runs in the browser, no backend) |
 | Newsletter | Disabled until a real provider is configured |
-| Contact form | Disabled until a real form service is configured |
+| Contact form | Set up for Netlify Forms in the code. Not confirmed working until it has been deployed and a real test message has arrived (see [Contact form (Netlify Forms)](#contact-form-netlify-forms)). |
 | WordPress integration | Not integrated (planned) |
 | Analytics | Not configured |
 | Advertising | Not configured |
@@ -143,7 +144,7 @@ dexira/
     │   ├── content-types.ts      Article content types and WordPress field mapping
     │   ├── categories.ts         Category data access
     │   ├── category-content.ts   Category descriptions and intro copy
-    │   └── contact-config.ts     Contact form configuration (currently empty)
+    │   └── contact-config.ts     Contact form configuration (Netlify Forms switch, success page path)
     ├── layouts/
     │   └── Layout.astro      Base page layout
     ├── lib/
@@ -152,6 +153,8 @@ dexira/
     │   ├── index.astro           Homepage
     │   ├── about.astro
     │   ├── contact.astro
+    │   ├── contact/
+    │   │   └── success.astro     Page shown after a message is submitted
     │   ├── privacy.astro
     │   ├── terms.astro
     │   ├── search.astro
@@ -215,6 +218,7 @@ Indexing is controlled by the single flag `PLACEHOLDER_CONTENT` in `src/data/art
 | Search (`/search/`) | `noindex, follow` | Same (always `noindex, follow`) |
 | 404 page | `noindex, nofollow` | Same (always `noindex, nofollow`) |
 | About, Contact, Privacy, Terms | Indexable | Indexable |
+| Contact success page (`/contact/success/`) | `noindex, nofollow` | Same (always `noindex, nofollow`) |
 
 **Sitemap.** `/sitemap.xml` lists only pages that are indexable. While the flag is `true` it lists About, Contact, Privacy and Terms. When the flag is `false` it also lists the homepage, the articles index, every article, and every category that has at least one article. If you add a new indexable static page, add it to `ALWAYS_INDEXABLE` in `src/pages/sitemap.xml.ts`.
 
@@ -230,10 +234,33 @@ Indexing is controlled by the single flag `PLACEHOLDER_CONTENT` in `src/data/art
 
 ## Newsletter and contact form status
 
-Both forms are intentionally **disabled**. Nothing is faked: no placeholder endpoints, no invented email addresses.
+The newsletter is intentionally **disabled**. Nothing is faked: no placeholder endpoints, no invented email addresses.
 
 - **Newsletter.** The form stays disabled until `PUBLIC_NEWSLETTER_ACTION` is set to a real provider's form-post URL. The privacy policy changes its wording automatically when the variable is set.
-- **Contact form.** The form on `/contact/` stays disabled, and no email address is shown, until `src/data/contact-config.ts` is filled in. Choose one option: set `formAction` to a real form-endpoint URL, or set `netlifyForms` to `true` once the site is deployed on Netlify. To show a public email address, set `email` to a real, monitored address.
+- **Contact form.** The form on `/contact/` is set up for Netlify Forms (`netlifyForms: true` in `src/data/contact-config.ts`). It is **not confirmed working** until the site has been deployed to Netlify and a real test message has arrived in the Netlify dashboard. No public email address is shown until `email` in the same file is set to a real, monitored address.
+
+## Contact form (Netlify Forms)
+
+The contact form uses [Netlify Forms](https://docs.netlify.com/forms/setup/). There is no separate backend.
+
+**How Netlify finds the form.** On every deploy Netlify reads the built HTML and registers any `<form>` marked `data-netlify="true"` that has a `name`. Here that is the form named `contact` in `dist/contact/index.html`. Netlify removes the `data-netlify` and `netlify-honeypot` attributes from the deployed page and adds its own hidden `form-name` field, so do not look for those attributes in the live page source; look for the form in the Netlify dashboard instead.
+
+**Netlify dashboard (once, after the first deploy).**
+
+1. In the site's **Forms** section of the Netlify dashboard, make sure **form detection is enabled** (menu names can differ slightly between dashboard versions). If you enable it now, trigger a new deploy.
+2. Once the **contact** form appears there, add an **email notification** for it (in the form or Forms notification settings) to a real, monitored address. Without this, messages only appear in the dashboard.
+
+**How the form behaves.**
+
+- Fields: full name, email address, subject (a list of enquiry types) and message. Both name and message must contain more than spaces, and the message needs at least 10 characters.
+- Spam: a hidden honeypot field (`bot-field`) plus Netlify's own spam filtering. Messages Netlify treats as spam appear under **Spam submissions**, not **Verified submissions**, so check both when testing.
+- With JavaScript the message is sent in the background. If sending fails, an error appears on the page, the text stays in the form, and the success page is **not** shown. Without JavaScript the browser posts the form normally.
+- On success the visitor is taken to `/contact/success/`. That page is `noindex` and is not in the sitemap. When opened directly it says that no message has been sent.
+- The form never sends from `localhost` or a private network address. It says so instead of pretending, because Netlify only receives messages on a deployed site.
+
+**Testing after deployment.** Deploy, open `/contact/` on the live site, submit a real message using a real email address and a few full sentences (obvious test text can be flagged as spam), and confirm you reach the success page and the message appears under **Forms** in the Netlify dashboard (and by email once notifications are set up). Also try an empty field and, if you like, turn off your network connection to confirm that an error appears instead of a success page.
+
+**Limits.** Netlify limits how many submissions a site can receive depending on your plan. Check your own plan's current Forms limits in the Netlify dashboard. The privacy policy (`src/pages/privacy.astro`) names Netlify; if the form is ever moved to another provider, update it.
 
 ## Future WordPress integration
 

@@ -1,0 +1,120 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+---
+
+<Layout
+  title="Thank you"
+  description="Your message to DEXIRA has been submitted."
+  noindex={true}
+>
+  <div class="container page">
+    <Breadcrumbs
+      items={[
+        { label: 'Home', href: '/' },
+        { label: 'Contact', href: '/contact/' },
+        { label: 'Thank you' },
+      ]}
+    />
+
+    <!-- The "message submitted" state is the default, so the page also works without JavaScript
+         (Netlify only sends visitors here after it has accepted a submission). The script below
+         swaps in the "nothing sent" state when the page is opened directly. -->
+    <section class="panel" aria-labelledby="page-title">
+      <p class="eyebrow" id="eyebrow">Message submitted</p>
+      <h1 class="title" id="page-title">Thank you for getting in touch</h1>
+
+      <div class="state" id="sent">
+        <p class="text">
+          Your message has been submitted to DEXIRA. If it needs a reply, we will use the email
+          address you gave us.
+        </p>
+        <p class="actions">
+          <a class="btn" href="/">Back to homepage</a>
+          <a class="link" href="/articles/">Browse stories</a>
+        </p>
+        <p class="small">
+          Need to add something? You can <a href="/contact/">send another message</a>.
+        </p>
+      </div>
+
+      <div class="state" id="not-sent" hidden>
+        <p class="text">
+          This page appears after a message is sent through the contact form. If you opened it
+          another way, nothing has been submitted.
+        </p>
+        <p class="actions">
+          <a class="btn" href="/contact/">Go to the contact form</a>
+          <a class="link" href="/">Back to homepage</a>
+        </p>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<script>
+  // Show the confirmation only when the visitor really arrived from the contact form.
+  // A static page cannot prove a submission happened, so this is a courtesy check, not security:
+  // it stops the page claiming "message submitted" to someone who simply opened the address.
+  const SUBMITTED_KEY = 'dexira-contact-submitted';
+  let cameFromForm = false;
+
+  try {
+    cameFromForm = sessionStorage.getItem(SUBMITTED_KEY) === '1';
+    sessionStorage.removeItem(SUBMITTED_KEY);
+  } catch {
+    // Storage can be blocked; fall back to the referrer check below.
+  }
+
+  if (!cameFromForm && document.referrer) {
+    try {
+      const from = new URL(document.referrer);
+      cameFromForm =
+        from.origin === window.location.origin &&
+        from.pathname.startsWith('/contact/') &&
+        from.pathname !== window.location.pathname;
+    } catch {
+      // Unreadable referrer: treat as "did not come from the form".
+    }
+  }
+
+  if (!cameFromForm) {
+    const sent = document.getElementById('sent');
+    const notSent = document.getElementById('not-sent');
+    const eyebrow = document.getElementById('eyebrow');
+    const title = document.getElementById('page-title');
+    if (sent && notSent && eyebrow && title) {
+      sent.hidden = true;
+      notSent.hidden = false;
+      eyebrow.textContent = 'Contact';
+      title.textContent = 'No message has been sent';
+    }
+  }
+</script>
+
+<style>
+  .page { padding-top: var(--s-6); padding-bottom: var(--s-12); }
+  .panel { max-width: 40rem; margin: var(--s-12) auto 0; text-align: center; }
+  .state[hidden] { display: none; }
+  .eyebrow { font-size: var(--t-sm); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-accent); }
+  .title { margin-top: var(--s-3); font-size: var(--t-3xl); color: var(--c-navy); }
+  .text { max-width: 34rem; margin: var(--s-4) auto 0; font-size: var(--t-lg); color: var(--c-ink-soft); }
+
+  .actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s-6); margin-top: var(--s-8); }
+  .btn {
+    display: inline-block;
+    padding: var(--s-3) var(--s-6);
+    background: var(--c-accent);
+    color: #fff;
+    border-radius: var(--radius);
+    font-size: var(--t-sm);
+    font-weight: 600;
+    transition: background var(--ease);
+  }
+  .btn:hover { background: var(--c-accent-dark); }
+  .link { font-size: var(--t-sm); font-weight: 600; color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+  .link:hover { color: var(--c-accent-dark); }
+
+  .small { margin-top: var(--s-8); padding-top: var(--s-6); border-top: 1px solid var(--c-line); font-size: var(--t-sm); color: var(--c-muted); }
+  .small a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+</style>
