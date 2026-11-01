@@ -1,0 +1,45 @@
+---
+interface Props {
+  url: string; // absolute canonical URL of the article
+  title: string;
+}
+const { url, title } = Astro.props;
+const u = encodeURIComponent(url);
+const t = encodeURIComponent(title);
+const links = [
+  { name: 'WhatsApp', href: `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}` },
+  { name: 'Facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${u}` },
+  { name: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${u}` },
+  { name: 'X', href: `https://x.com/intent/post?text=${t}&url=${u}` },
+];
+---
+
+<section class="share" aria-label="Share this story">
+  <p class="label">Share this story</p>
+  <ul role="list">
+    {links.map((l) => (
+      <li>
+        <a href={l.href} target="_blank" rel="noopener noreferrer" aria-label={`Share on ${l.name} (opens in a new tab)`}>
+          {l.name}
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3) var(--s-4); padding-block: var(--s-6); border-block: 1px solid var(--c-line); }
+  .label { font-size: var(--t-xs); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-muted); }
+  ul { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  a {
+    display: inline-block;
+    padding: var(--s-2) var(--s-4);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius);
+    font-size: var(--t-sm);
+    font-weight: 600;
+    color: var(--c-navy);
+    transition: border-color var(--ease), color var(--ease);
+  }
+  a:hover { border-color: var(--c-accent); color: var(--c-accent); }
+</style>

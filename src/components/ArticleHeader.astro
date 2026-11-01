@@ -1,0 +1,47 @@
+---
+import type { Article } from '../data/articles';
+import { formatDate } from '../data/articles';
+
+interface Props {
+  article: Article;
+}
+const { article } = Astro.props;
+const updated = article.updatedAt && article.updatedAt !== article.publishedAt ? article.updatedAt : undefined;
+---
+
+<header class="head">
+  <a class="eyebrow cat" href={`/category/${article.categorySlug}/`}>{article.category}</a>
+  <h1>{article.title}</h1>
+  <p class="subtitle">{article.subtitle}</p>
+  <p class="byline">
+    <span>By <span class="author">{article.author.name}</span></span>
+    <span aria-hidden="true">·</span>
+    <span>Published <time datetime={article.publishedAt}>{formatDate(article.publishedAt)}</time></span>
+    {updated && (
+      <>
+        <span aria-hidden="true">·</span>
+        <span>Updated <time datetime={updated}>{formatDate(updated)}</time></span>
+      </>
+    )}
+    <span aria-hidden="true">·</span>
+    <span>{article.readingTime} min read</span>
+  </p>
+</header>
+
+<style>
+  .head { display: flex; flex-direction: column; gap: var(--s-4); }
+  .cat { align-self: flex-start; }
+  .cat:hover { text-decoration: underline; }
+  h1 { font-size: var(--t-3xl); color: var(--c-navy); text-wrap: balance; }
+  .subtitle { font-family: var(--f-serif); font-size: var(--t-xl); line-height: 1.4; color: var(--c-ink-soft); }
+  .byline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-2);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--c-line);
+    font-size: var(--t-sm);
+    color: var(--c-muted);
+  }
+  .author { color: var(--c-ink); font-weight: 600; }
+</style>

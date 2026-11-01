@@ -22,3 +22,14 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Local backups
+*.bak
+
+# Environment files (keep example templates)
+.env.*
+!.env.example
+
+# Local hosting configuration
+.netlify/
+.vercel/

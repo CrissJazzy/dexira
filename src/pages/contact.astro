@@ -1,0 +1,180 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import { contactConfig, enquiryTypes, isContactFormConfigured } from '../data/contact-config';
+
+const netlify = contactConfig.netlifyForms;
+// Netlify Forms posts to the page itself; any other provider gets its endpoint as the action.
+const action = !netlify && contactConfig.formAction ? contactConfig.formAction : undefined;
+---
+
+<Layout
+  title="Contact"
+  description="Get in touch with DEXIRA for general enquiries, editorial feedback, corrections, article suggestions and business or partnership enquiries."
+>
+  <div class="container page">
+    <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Contact' }]} />
+
+    <header class="intro">
+      <h1 class="name">Contact DEXIRA</h1>
+      <p class="lead">
+        Questions, feedback, corrections and ideas are all welcome. Choose the topic that fits best
+        and tell us what you have in mind.
+      </p>
+      {contactConfig.email && (
+        <p class="email">
+          Email: <a href={`mailto:${contactConfig.email}`}>{contactConfig.email}</a>
+        </p>
+      )}
+    </header>
+
+    <section class="block" aria-labelledby="topics-title">
+      <SectionHeader id="topics-title" title="How can we help?" />
+      <ul class="topics" role="list">
+        {enquiryTypes.map((t) => (
+          <li class="topic">
+            <h3 class="topic-title">{t.label}</h3>
+            <p class="topic-text">{t.description}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="block" aria-labelledby="form-title">
+      <SectionHeader id="form-title" title="Send a message" />
+
+      <div class="form-wrap">
+        {!isContactFormConfigured && (
+          <p class="notice" id="form-notice" role="note">
+            <strong>The contact form is not active yet.</strong> DEXIRA has not connected a service
+            that can receive messages, so nothing you type here can be sent. Please check back soon.
+          </p>
+        )}
+
+        <form
+          id="contact-form"
+          method="post"
+          action={action}
+          name={netlify ? 'contact' : undefined}
+          data-netlify={netlify ? 'true' : undefined}
+          data-netlify-honeypot={netlify ? 'bot-field' : undefined}
+          aria-describedby={!isContactFormConfigured ? 'form-notice' : undefined}
+        >
+          <fieldset class="fields" disabled={!isContactFormConfigured}>
+            <legend class="sr">Contact form</legend>
+            {netlify && <input type="hidden" name="form-name" value="contact" />}
+
+            <p class="req-note">Fields marked with an asterisk (*) are required.</p>
+
+            <!-- Honeypot for spam bots. Hidden from people and assistive technology. -->
+            <div class="trap" aria-hidden="true">
+              <label>Leave this field empty <input type="text" name="bot-field" tabindex="-1" autocomplete="off" /></label>
+            </div>
+
+            <div class="field">
+              <label for="name">Full name <span class="req" aria-hidden="true">*</span></label>
+              <input id="name" name="name" type="text" autocomplete="name" required maxlength="120" />
+            </div>
+
+            <div class="field">
+              <label for="email">Email address <span class="req" aria-hidden="true">*</span></label>
+              <input id="email" name="email" type="email" autocomplete="email" required maxlength="254" />
+            </div>
+
+            <div class="field">
+              <label for="subject">Subject <span class="req" aria-hidden="true">*</span></label>
+              <select id="subject" name="subject" required>
+                <option value="" disabled selected>Choose a subject</option>
+                {enquiryTypes.map((t) => <option value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="message">Message <span class="req" aria-hidden="true">*</span></label>
+              <textarea id="message" name="message" rows="7" required maxlength="5000"></textarea>
+            </div>
+
+            <p class="hint">
+              By sending a message you agree that we may use the details you provide to reply to you.
+              See the <a href="/privacy/">Privacy Policy</a>.
+            </p>
+
+            <button type="submit" class="btn">Send message</button>
+          </fieldset>
+        </form>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .page { padding-top: var(--s-6); padding-bottom: var(--s-12); }
+  .intro { margin-top: var(--s-8); max-width: 44rem; }
+  .name { font-size: var(--t-3xl); color: var(--c-navy); }
+  .lead { margin-top: var(--s-4); font-size: var(--t-lg); color: var(--c-ink-soft); }
+  .email { margin-top: var(--s-4); color: var(--c-ink-soft); }
+  .email a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+
+  .block { margin-top: var(--s-12); }
+
+  .topics { display: grid; gap: var(--s-6); grid-template-columns: minmax(0, 1fr); }
+  .topic { min-width: 0; }
+  .topic-title { font-size: var(--t-lg); color: var(--c-navy); }
+  .topic-text { margin-top: var(--s-2); font-size: var(--t-sm); color: var(--c-ink-soft); }
+  @media (min-width: 640px) { .topics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-8); } }
+
+  .form-wrap { max-width: 40rem; }
+  .notice {
+    margin-bottom: var(--s-6);
+    padding: var(--s-4);
+    background: var(--c-surface);
+    border-left: 3px solid var(--c-accent);
+    font-size: var(--t-sm);
+    color: var(--c-ink-soft);
+  }
+  .fields { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .req-note { margin-bottom: var(--s-6); font-size: var(--t-sm); color: var(--c-ink-soft); }
+  .req { margin-left: 0.125rem; color: var(--c-accent-dark); }
+  .field { margin-bottom: var(--s-6); }
+  .field label { display: block; margin-bottom: var(--s-2); font-size: var(--t-sm); font-weight: 600; color: var(--c-navy); }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: var(--s-3) var(--s-4);
+    font: inherit;
+    color: var(--c-ink);
+    background: var(--c-bg);
+    border: 1px solid var(--c-muted);
+    border-radius: var(--radius);
+  }
+  .field textarea { resize: vertical; min-height: 9rem; }
+  .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 2px;
+    border-color: var(--c-accent);
+  }
+  .fields[disabled] .field input,
+  .fields[disabled] .field select,
+  .fields[disabled] .field textarea { background: var(--c-surface); color: var(--c-muted); cursor: not-allowed; }
+
+  .hint { margin-bottom: var(--s-6); font-size: var(--t-xs); color: var(--c-muted); }
+  .hint a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+
+  .btn {
+    padding: var(--s-3) var(--s-8);
+    font: inherit;
+    font-size: var(--t-sm);
+    font-weight: 600;
+    color: #fff;
+    background: var(--c-accent);
+    border: 0;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background var(--ease);
+  }
+  .btn:hover { background: var(--c-accent-dark); }
+  .btn:disabled { background: var(--c-muted); cursor: not-allowed; }
+
+  .trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>

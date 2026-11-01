@@ -1,0 +1,249 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LegalDoc from '../components/LegalDoc.astro';
+import { isContactFormConfigured } from '../data/contact-config';
+
+/**
+ * MAINTAINER NOTES
+ * - Update `updated` whenever the policy changes materially.
+ * - `practices` below is the single list of what DEXIRA currently does. When a
+ *   service is added (analytics, ads, a newsletter provider, a form provider),
+ *   change its entry here AND review the matching section in the page body.
+ * - Newsletter: its status follows PUBLIC_NEWSLETTER_ACTION, the same switch Newsletter.astro
+ *   uses. This page only READS it and never activates anything. Before that variable is set,
+ *   choose a provider, put its real name in `newsletterProvider` below, check that the
+ *   provider's unsubscribe link works, and review the "Newsletter" section. The build stops
+ *   with an error if the newsletter is switched on while `newsletterProvider` is empty, so
+ *   the policy cannot be forgotten.
+ * - This text is a general statement for a developing publication, not legal advice.
+ *   Have it reviewed before relying on it, especially once data is collected.
+ */
+const updated = '2026-11-01';
+
+// Newsletter. No provider has been chosen, so this stays empty. Do not guess a name.
+const newsletterProvider = '';
+const isNewsletterActive = Boolean(import.meta.env.PUBLIC_NEWSLETTER_ACTION);
+if (isNewsletterActive && newsletterProvider === '') {
+  throw new Error(
+    'privacy.astro: PUBLIC_NEWSLETTER_ACTION is set but newsletterProvider is empty. ' +
+      'Name the email provider in the privacy policy before activating the newsletter.',
+  );
+}
+
+const practices = [
+  {
+    name: 'Contact form',
+    status: isContactFormConfigured ? 'Active' : 'Not active yet',
+    note: isContactFormConfigured
+      ? 'Messages are sent to a form service chosen by DEXIRA.'
+      : 'No form service is connected, so messages cannot be received.',
+  },
+  {
+    name: 'Newsletter',
+    status: isNewsletterActive ? 'Active' : 'Not active yet',
+    note: isNewsletterActive
+      ? 'Subscriber email addresses are passed to the email service provider named in the Newsletter section below.'
+      : 'The signup form is switched off, so DEXIRA is not collecting subscriber email addresses.',
+  },
+  {
+    name: 'Analytics',
+    status: 'Not configured',
+    note: 'DEXIRA has not set up a service that measures visitors.',
+  },
+  {
+    name: 'Advertising',
+    status: 'Not configured',
+    note: 'DEXIRA does not currently show ads or work with advertising partners.',
+  },
+  {
+    name: 'Cookies for analytics or advertising',
+    status: 'Not used',
+    note: 'DEXIRA does not currently set cookies for these purposes.',
+  },
+  {
+    name: 'Fonts',
+    status: 'Served by DEXIRA',
+    note: 'Fonts are delivered from this site, not from a third-party font service.',
+  },
+];
+---
+
+<Layout
+  title="Privacy Policy"
+  description="How DEXIRA handles information, including contact form messages, future newsletter subscriptions, cookies, analytics, advertising, third-party services, retention and your privacy choices."
+>
+  <LegalDoc
+    title="Privacy Policy"
+    intro="This policy explains what information DEXIRA handles, what we do not do, and what may change as the publication grows."
+    updated={updated}
+  >
+    <h2 id="summary">Summary</h2>
+    <p>
+      DEXIRA is an independent digital publication. You can read it without creating an account
+      or giving us any personal information. The table below shows where things stand today.
+      Services we may introduce later, such as a newsletter, are described separately, and we
+      will update this page when they are.
+    </p>
+
+    <h2 id="status">Current status</h2>
+    <dl class="status">
+      {practices.map((p) => (
+        <div class="status-row">
+          <dt>{p.name}</dt>
+          <dd><strong>{p.status}.</strong> {p.note}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <h2 id="information">Information you choose to send us</h2>
+    <p>
+      We only receive information that you choose to send, for example when you write to us or,
+      once it is available, subscribe to our newsletter. That may include your name, your email
+      address and the content of your message. Please do not
+      include sensitive personal information in a message unless it is necessary.
+    </p>
+    <p>
+      We use what you send to read and reply to your message, to improve the publication, and to
+      keep reasonable records of correspondence. We do not sell the information you send us.
+    </p>
+
+    <h2 id="contact-form">Contact form</h2>
+    <p>
+      The contact form asks for your full name, email address, an enquiry subject and a message.
+      {isContactFormConfigured
+        ? ' When you submit the form, these details are passed to a form service that DEXIRA uses to deliver messages to us. That service handles the data on our behalf and under its own terms.'
+        : ' The form is not active yet, so no messages are being received. When it is switched on, the details you enter will be passed to a form service that delivers them to us, and this policy will name that service.'}
+    </p>
+
+    <h2 id="newsletter">Newsletter</h2>
+    <p>
+      {isNewsletterActive
+        ? 'DEXIRA offers an email newsletter. If you subscribe, we collect the email address you enter.'
+        : 'DEXIRA plans to offer an email newsletter. Signup is not active yet, so we are not collecting subscriber email addresses today. This section explains how subscriptions will work once they are switched on.'}
+    </p>
+
+    <h3 id="newsletter-collection">What we collect and why</h3>
+    <p>
+      When newsletter signup is active, we will collect the email address you type into the
+      signup form. We will use it to send you the DEXIRA newsletter, which may include
+      publication updates, new stories and other editorial communications. We will not use it
+      for other purposes without telling you.
+    </p>
+
+    <h3 id="newsletter-consent">Consent</h3>
+    <p>
+      Subscribing is voluntary and happens only when you enter your email address and submit the
+      signup form. Visiting DEXIRA does not subscribe you, and we will not add your address to
+      the newsletter because you contacted us or read a story.
+    </p>
+
+    <h3 id="newsletter-provider">Email service provider</h3>
+    <p>
+      {isNewsletterActive
+        ? `Newsletter signups and emails are handled for us by ${newsletterProvider}. It processes subscriber email addresses on our behalf and under its own terms and privacy policy.`
+        : 'DEXIRA has not yet chosen or set up an email service provider. Before signup is switched on, we will name the provider on this page and explain its role in handling subscriber information.'}
+    </p>
+
+    <h3 id="newsletter-unsubscribe">Unsubscribing</h3>
+    <p>
+      {isNewsletterActive
+        ? 'Every newsletter email will include a link to unsubscribe. You can also write to us through the contact page and ask to be removed.'
+        : 'Once newsletters are being sent, each email will include a link to unsubscribe. No newsletters are being sent yet, so there is nothing to unsubscribe from at the moment.'}
+    </p>
+
+    <h3 id="newsletter-retention">How long we keep subscriber information</h3>
+    <p>
+      We will keep subscriber information only for as long as it is needed for the newsletter
+      and to meet any legal obligations that apply. We have not set a fixed period.
+    </p>
+
+    <h2 id="cookies">Cookies and similar technologies</h2>
+    <p>
+      Cookies are small files stored on your device. DEXIRA does not currently set cookies for
+      analytics or advertising. Your browser, our hosting provider or services you choose to
+      visit from our pages may store technical data of their own. If we introduce cookies or
+      similar technologies in future, we will explain what they do here and, where required,
+      ask for your consent.
+    </p>
+
+    <h2 id="analytics">Analytics</h2>
+    <p>
+      DEXIRA has not set up analytics. If we add a service to understand how the site is used,
+      we will name it here, describe what it measures, and describe any choices you have.
+    </p>
+
+    <h2 id="advertising">Advertising and future partners</h2>
+    <p>
+      DEXIRA does not currently show advertising. We may work with advertising or sponsorship
+      partners in the future. If we do, those partners may use cookies or similar technologies
+      to show or measure ads. We will update this policy before any such service starts, and
+      explain how you can manage your choices.
+    </p>
+
+    <h2 id="third-parties">Third-party services and links</h2>
+    <p>
+      DEXIRA is delivered through a hosting provider, which typically keeps technical logs such
+      as IP addresses, browser details and the pages requested, in order to run and secure the
+      service. If we start a newsletter, an email service provider will also handle subscriber
+      email addresses, as described in the Newsletter section. Some pages include links to share stories on other platforms. Following one takes
+      you to that platform, which has its own privacy practices. Our pages may also link to
+      external websites that we do not control. We are not responsible for how those sites
+      handle information.
+    </p>
+
+    <h2 id="retention">Data retention</h2>
+    <p>
+      We have not set fixed retention periods yet. Our intention is to keep messages only as long
+      as needed to respond and to keep sensible records, and then delete them. When specific
+      periods are set, they will be stated here. Subscriber information is covered in the
+      Newsletter section above.
+    </p>
+
+    <h2 id="security">Data security</h2>
+    <p>
+      We aim to use reasonable measures to protect information we hold, and to choose service
+      providers that do the same. No method of transmission or storage is completely secure, so
+      we cannot guarantee absolute security.
+    </p>
+
+    <h2 id="rights">Your rights and privacy enquiries</h2>
+    <p>
+      If you have sent us personal information, including an email address for the newsletter,
+      you may ask what we hold about you, ask us to
+      correct it, or ask us to delete it. Depending on where you live, local law may give you
+      additional rights. To make a request or ask a privacy question, use the
+      <a href="/contact/">contact page</a> and choose the general enquiries subject.
+    </p>
+
+    <h2 id="children">Children</h2>
+    <p>
+      DEXIRA is a general-audience publication and is not directed at children. We do not
+      knowingly ask children for personal information.
+    </p>
+
+    <h2 id="changes">Changes to this policy</h2>
+    <p>
+      We will update this policy as DEXIRA changes and as services are added or removed. The
+      date at the top of the page shows when it was last updated. Please check it from time to
+      time.
+    </p>
+
+    <h2 id="about-policy">About this document</h2>
+    <p>
+      This policy is a general statement of our practices. It is not legal advice and does not
+      create rights beyond those provided by law.
+    </p>
+  </LegalDoc>
+</Layout>
+
+<style>
+  h3 { margin-top: var(--s-8); font-size: var(--t-lg); color: var(--c-navy); }
+  .status { margin-top: var(--s-4); border-top: 1px solid var(--c-line); }
+  .status-row { padding-block: var(--s-3); border-bottom: 1px solid var(--c-line); }
+  .status-row dt { font-weight: 600; color: var(--c-navy); }
+  .status-row dd { margin: var(--s-1) 0 0; font-size: var(--t-sm); color: var(--c-ink-soft); }
+  @media (min-width: 640px) {
+    .status-row { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: var(--s-6); }
+    .status-row dd { margin: 0; }
+  }
+</style>

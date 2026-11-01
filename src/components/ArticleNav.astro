@@ -1,0 +1,53 @@
+---
+import type { Article } from '../data/articles';
+import { formatDate } from '../data/articles';
+
+interface Props {
+  previous?: Article;
+  next?: Article;
+}
+const { previous, next } = Astro.props;
+---
+
+{(previous || next) && (
+  <nav class="pager container" aria-label="More stories">
+    {previous && (
+      <a class="prev" href={`/articles/${previous.slug}/`} rel="prev">
+        <span class="dir"><span aria-hidden="true">←</span> Previous story</span>
+        <span class="title">{previous.title}</span>
+        <span class="meta">{formatDate(previous.publishedAt)}</span>
+      </a>
+    )}
+    {next && (
+      <a class="next" href={`/articles/${next.slug}/`} rel="next">
+        <span class="dir">Next story <span aria-hidden="true">→</span></span>
+        <span class="title">{next.title}</span>
+        <span class="meta">{formatDate(next.publishedAt)}</span>
+      </a>
+    )}
+  </nav>
+)}
+
+<style>
+  .pager { display: grid; gap: var(--s-4); padding-block: var(--s-12) 0; }
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    padding: var(--s-6);
+    border: 1px solid var(--c-line);
+    min-width: 0;
+    transition: border-color var(--ease);
+  }
+  a:hover { border-color: var(--c-accent); }
+  .dir { font-size: var(--t-xs); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-accent); }
+  .title { font-family: var(--f-serif); font-size: var(--t-lg); font-weight: 700; line-height: 1.25; color: var(--c-navy); }
+  a:hover .title { color: var(--c-accent); }
+  .meta { font-size: var(--t-xs); color: var(--c-muted); }
+
+  @media (min-width: 640px) {
+    .pager { grid-template-columns: 1fr 1fr; }
+    .prev { grid-column: 1; }
+    .next { grid-column: 2; text-align: right; }
+  }
+</style>

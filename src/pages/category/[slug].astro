@@ -1,0 +1,176 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import CategoryFeature from '../../components/CategoryFeature.astro';
+import CategoryNav from '../../components/CategoryNav.astro';
+import { site } from '../../data/site';
+import { PLACEHOLDER_CONTENT } from '../../data/articles';
+import {
+  getCategories,
+  getArticlesByCategory,
+  pickCategoryFeatured,
+} from '../../data/categories';
+
+// One page per configured category (site.ts), including categories with no articles.
+export async function getStaticPaths() {
+  const categories = await getCategories();
+  return Promise.all(
+    categories.map(async (category) => ({
+      params: { slug: category.slug },
+      props: { category, articles: await getArticlesByCategory(category.slug) },
+    })),
+  );
+}
+
+const { category, articles } = Astro.props;
+const featured = pickCategoryFeatured(articles);
+const rest = featured ? articles.filter((a) => a.slug !== featured.slug) : [];
+const count = articles.length;
+const countLabel = `${count} ${count === 1 ? 'story' : 'stories'}`;
+
+const canonical = new URL(`/category/${category.slug}/`, Astro.site).href;
+const homeUrl = new URL('/', Astro.site).href;
+const pageTitle = `${category.name} Stories and Analysis`;
+
+const collectionLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `${category.name} | ${site.name}`,
+  description: category.description,
+  url: canonical,
+  isPartOf: { '@type': 'WebSite', name: site.name, url: homeUrl },
+  ...(count > 0
+    ? {
+        mainEntity: {
+          '@type': 'ItemList',
+          numberOfItems: count,
+          itemListElement: articles.map((a, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            url: new URL(`/articles/${a.slug}/`, Astro.site).href,
+          })),
+        },
+      }
+    : {}),
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: homeUrl },
+    { '@type': 'ListItem', position: 2, name: category.name, item: canonical },
+  ],
+};
+
+// Escape "<" so text can never close the script tag early.
+const toJson = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
+---
+
+<Layout
+  title={pageTitle}
+  description={category.description}
+  image={featured?.image}
+  noindex={PLACEHOLDER_CONTENT}
+>
+  <script is:inline slot="head" type="application/ld+json" set:html={toJson(collectionLd)} />
+  <script is:inline slot="head" type="application/ld+json" set:html={toJson(breadcrumbLd)} />
+
+  <div class="container page">
+    <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: category.name }]} />
+
+    <header class="intro">
+      <h1 class="name">{category.name}</h1>
+      <p class="lead">{category.description}</p>
+      {category.intro && <p class="more">{category.intro}</p>}
+      <p class="count">{countLabel}</p>
+    </header>
+
+    {PLACEHOLDER_CONTENT && count > 0 && (
+      <p class="notice" role="note">
+        Development preview: the stories below are placeholders awaiting real editorial content.
+      </p>
+    )}
+
+    {featured && (
+      <section class="block" aria-label={`Featured ${category.name} story`}>
+        <CategoryFeature article={featured} />
+      </section>
+    )}
+
+    {rest.length > 0 && (
+      <section class="block" aria-labelledby="latest-title">
+        <h2 id="latest-title" class="section-title">Latest in {category.name}</h2>
+        <div class="grid">
+          {rest.map((article) => <ArticleCard article={article} />)}
+        </div>
+      </section>
+    )}
+
+    {count === 0 && (
+      <section class="empty block" aria-labelledby="empty-title">
+        <h2 id="empty-title" class="empty-title">No {category.name} stories yet</h2>
+        <p class="empty-text">
+          We are preparing our first stories in this category. In the meantime, you can
+          browse another category or return to the homepage.
+        </p>
+        <a class="btn" href="/">Back to homepage</a>
+      </section>
+    )}
+
+    <div class="block">
+      <CategoryNav current={category.slug} />
+    </div>
+
+    {count > 0 && (
+      <p class="back">
+        <a href="/"><span aria-hidden="true">←</span> Back to homepage</a>
+      </p>
+    )}
+  </div>
+</Layout>
+
+<style>
+  .page { padding-top: var(--s-6); padding-bottom: var(--s-12); }
+
+  .intro { margin-top: var(--s-8); max-width: 46rem; }
+  .name { font-size: var(--t-3xl); color: var(--c-navy); overflow-wrap: anywhere; }
+  .lead { margin-top: var(--s-4); font-size: var(--t-lg); color: var(--c-ink-soft); }
+  .more { margin-top: var(--s-3); font-size: var(--t-base); color: var(--c-muted); }
+  .count { margin-top: var(--s-4); font-size: var(--t-sm); font-weight: 600; color: var(--c-muted); }
+
+  .notice { margin-top: var(--s-6); font-size: var(--t-xs); color: var(--c-muted); }
+
+  .block { margin-top: var(--s-12); }
+  .section-title { font-size: var(--t-xl); color: var(--c-navy); margin-bottom: var(--s-6); }
+
+  .grid { display: grid; gap: var(--s-8); grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+  .empty {
+    padding: var(--s-12) var(--gutter);
+    background: var(--c-surface);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius);
+    text-align: center;
+  }
+  .empty-title { font-size: var(--t-xl); color: var(--c-navy); overflow-wrap: anywhere; }
+  .empty-text { max-width: 34rem; margin: var(--s-3) auto var(--s-6); color: var(--c-ink-soft); }
+  .btn {
+    display: inline-block;
+    padding: var(--s-3) var(--s-6);
+    background: var(--c-accent);
+    color: #fff;
+    border-radius: var(--radius);
+    font-size: var(--t-sm);
+    font-weight: 600;
+    transition: background var(--ease);
+  }
+  .btn:hover { background: var(--c-accent-dark); }
+
+  .back { margin-top: var(--s-12); text-align: center; }
+  .back a { font-size: var(--t-sm); font-weight: 600; color: var(--c-accent); }
+  .back a:hover { color: var(--c-accent-dark); text-decoration: underline; }
+</style>

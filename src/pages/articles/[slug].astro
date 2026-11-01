@@ -1,0 +1,150 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ArticleHeader from '../../components/ArticleHeader.astro';
+import ArticleBody from '../../components/ArticleBody.astro';
+import ShareLinks from '../../components/ShareLinks.astro';
+import RelatedStories from '../../components/RelatedStories.astro';
+import ArticleNav from '../../components/ArticleNav.astro';
+import { site } from '../../data/site';
+import {
+  PLACEHOLDER_CONTENT,
+  getAllArticles,
+  getRelatedArticles,
+  getAdjacentArticles,
+} from '../../data/articles';
+
+// Only slugs that exist in the dataset are generated; any other /articles/<slug>/ is a 404.
+export async function getStaticPaths() {
+  const articles = await getAllArticles();
+  return articles.map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const [related, adjacent] = await Promise.all([
+  getRelatedArticles(article, 3),
+  getAdjacentArticles(article),
+]);
+
+const canonical = new URL(`/articles/${article.slug}/`, Astro.site).href;
+const homeUrl = new URL('/', Astro.site).href;
+const categoryUrl = new URL(`/category/${article.categorySlug}/`, Astro.site).href;
+// Rich results need a raster image; SVG placeholders are left out until real images exist.
+const imageUrl = article.image.toLowerCase().endsWith('.svg')
+  ? undefined
+  : new URL(article.image, Astro.site).href;
+
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: article.title,
+  description: article.excerpt,
+  datePublished: article.publishedAt,
+  dateModified: article.updatedAt ?? article.publishedAt,
+  articleSection: article.category,
+  author: { '@type': article.author.type, name: article.author.name },
+  publisher: { '@type': 'Organization', name: site.name },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  ...(imageUrl ? { image: [imageUrl] } : {}),
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: homeUrl },
+    { '@type': 'ListItem', position: 2, name: article.category, item: categoryUrl },
+    { '@type': 'ListItem', position: 3, name: article.title, item: canonical },
+  ],
+};
+
+// Escape "<" so article text can never close the script tag early.
+const toJson = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
+---
+
+<Layout
+  title={article.title}
+  description={article.excerpt}
+  image={article.image}
+  type="article"
+  noindex={PLACEHOLDER_CONTENT}
+  publishedTime={article.publishedAt}
+  modifiedTime={article.updatedAt ?? article.publishedAt}
+  section={article.category}
+  author={article.author.name}
+>
+  <script is:inline slot="head" type="application/ld+json" set:html={toJson(articleLd)} />
+  <script is:inline slot="head" type="application/ld+json" set:html={toJson(breadcrumbLd)} />
+
+  <article class="article">
+    <div class="container">
+      <div class="measure wide">
+        <Breadcrumbs
+          items={[
+            { label: 'Home', href: '/' },
+            { label: article.category, href: `/category/${article.categorySlug}/` },
+            { label: article.title },
+          ]}
+        />
+        <div class="head-wrap">
+          <ArticleHeader article={article} />
+        </div>
+      </div>
+    </div>
+
+    <figure class="container hero">
+      <div class="hero-inner">
+        <img
+          src={article.image}
+          alt={article.imageAlt}
+          width="1600"
+          height="1000"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+        {article.imageCaption && <figcaption>{article.imageCaption}</figcaption>}
+      </div>
+    </figure>
+
+    <div class="container">
+      <div class="measure">
+        {PLACEHOLDER_CONTENT && (
+          <p class="notice" role="note">
+            Development placeholder: this story is sample content awaiting real editorial text.
+          </p>
+        )}
+        <ArticleBody blocks={article.body} html={article.contentHtml} />
+        <ShareLinks url={canonical} title={article.title} />
+      </div>
+    </div>
+  </article>
+
+  <RelatedStories articles={related} />
+  <ArticleNav previous={adjacent.previous} next={adjacent.next} />
+
+  <p class="back container">
+    <a href="/"><span aria-hidden="true">←</span> Back to homepage</a>
+  </p>
+</Layout>
+
+<style>
+  .article { padding-top: var(--s-6); }
+  .measure { max-width: 46rem; margin-inline: auto; }
+  .measure.wide { max-width: 52rem; }
+  .head-wrap { margin-top: var(--s-6); }
+
+  .hero { margin-block: var(--s-8); }
+  .hero-inner { max-width: 64rem; margin-inline: auto; }
+  .hero img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--c-surface); }
+  .hero figcaption { margin-top: var(--s-2); font-size: var(--t-xs); color: var(--c-muted); }
+
+  .notice { margin-bottom: var(--s-6); font-size: var(--t-xs); font-style: italic; color: var(--c-muted); }
+
+  .back { padding-block: var(--s-8) 0; text-align: center; }
+  .back a { font-size: var(--t-sm); font-weight: 600; color: var(--c-accent); }
+  .back a:hover { color: var(--c-accent-dark); text-decoration: underline; }
+</style>

@@ -1,0 +1,60 @@
+---
+import { site, categories } from '../data/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container grid">
+    <div class="brand">
+      <a href="/" class="logo" aria-label="DEXIRA home">DEXIRA</a>
+      <p class="tag">{site.tagline}</p>
+      <p class="desc">{site.description}</p>
+    </div>
+
+    <nav aria-label="Categories">
+      <h2 class="head">Categories</h2>
+      <ul>
+        {categories.map((c) => (
+          <li><a href={`/category/${c.slug}/`}>{c.name}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <nav aria-label="Publication">
+      <h2 class="head">Publication</h2>
+      <ul>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/contact/">Contact</a></li>
+        <li><a href="/privacy/">Privacy Policy</a></li>
+        <li><a href="/terms/">Terms and Conditions</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="container legal">
+    <p>© {year} {site.name}. All rights reserved.</p>
+  </div>
+</footer>
+
+<style>
+  .footer { background: var(--c-navy); color: #c9d3e6; margin-top: var(--s-16); padding-top: var(--s-12); }
+  .grid { display: grid; gap: var(--s-8); padding-bottom: var(--s-8); }
+  .logo { font-family: var(--f-serif); font-weight: 800; font-size: 1.5rem; letter-spacing: 0.14em; color: #fff; }
+  .tag { margin-top: var(--s-2); font-family: var(--f-serif); font-style: italic; color: #fff; }
+  .desc { margin-top: var(--s-3); font-size: var(--t-sm); max-width: 38ch; }
+  .head {
+    font-family: var(--f-sans);
+    font-size: var(--t-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8fa3c7;
+    margin-bottom: var(--s-3);
+  }
+  /* 4px padding above and below each link replaces the 8px gap between items:
+     same look, but each link is a taller touch target. */
+  nav a { display: inline-block; padding-block: var(--s-1); font-size: var(--t-sm); transition: color var(--ease); }
+  nav a:hover { color: #fff; text-decoration: underline; }
+  .legal { border-top: 1px solid rgba(255, 255, 255, 0.12); padding-block: var(--s-4); font-size: var(--t-xs); }
+
+  @media (min-width: 768px) { .grid { grid-template-columns: 2fr 1fr 1fr; } }
+</style>

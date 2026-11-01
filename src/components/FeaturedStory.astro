@@ -1,0 +1,76 @@
+---
+import type { Article } from '../data/articles';
+import { formatDate } from '../data/articles';
+
+interface Props { article: Article }
+const { article } = Astro.props;
+const href = `/articles/${article.slug}/`;
+---
+
+<section class="featured container" aria-labelledby="featured-title">
+  <article class="story">
+    <figure class="media">
+      <img
+        src={article.image}
+        alt={article.imageAlt}
+        width="1600"
+        height="1000"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+      />
+    </figure>
+    <div class="text">
+      <p class="label">
+        <span class="tag">Featured</span>
+        <a class="eyebrow" href={`/category/${article.categorySlug}/`}>{article.category}</a>
+      </p>
+      <h2 id="featured-title"><a href={href}>{article.title}</a></h2>
+      <p class="excerpt">{article.excerpt}</p>
+      <p class="meta">
+        <time datetime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
+        <span aria-hidden="true">·</span>
+        <span>{article.readingTime} min read</span>
+      </p>
+      <a class="read" href={href}>Read article <span aria-hidden="true">→</span></a>
+    </div>
+  </article>
+</section>
+
+<style>
+  .featured { padding-block: var(--s-6) var(--s-12); }
+  .story { display: grid; gap: var(--s-6); }
+  .media { margin: 0; background: var(--c-surface); }
+  .media img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+  .text { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
+  .label { display: flex; align-items: center; gap: var(--s-3); }
+  .tag {
+    background: var(--c-navy);
+    color: #fff;
+    font-size: var(--t-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px var(--s-2);
+  }
+  .label a:hover { text-decoration: underline; }
+  h2 { font-size: var(--t-2xl); color: var(--c-navy); text-wrap: balance; }
+  h2 a:hover { color: var(--c-accent); }
+  .excerpt { font-size: var(--t-lg); color: var(--c-ink-soft); font-family: var(--f-serif); line-height: 1.5; }
+  .meta { display: flex; gap: var(--s-2); font-size: var(--t-sm); color: var(--c-muted); }
+  .read {
+    align-self: flex-start;
+    font-weight: 600;
+    font-size: var(--t-sm);
+    color: var(--c-accent);
+    border-bottom: 2px solid var(--c-accent);
+    padding-bottom: 2px;
+    transition: color var(--ease), border-color var(--ease);
+  }
+  .read:hover { color: var(--c-accent-dark); border-color: var(--c-accent-dark); }
+
+  @media (min-width: 900px) {
+    .story { grid-template-columns: 1.35fr 1fr; gap: var(--s-12); align-items: center; }
+    h2 { font-size: var(--t-3xl); }
+  }
+</style>

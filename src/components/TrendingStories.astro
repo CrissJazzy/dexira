@@ -1,0 +1,61 @@
+---
+import type { Article } from '../data/articles';
+import { formatDate } from '../data/articles';
+import SectionHeader from './SectionHeader.astro';
+
+interface Props { articles: Article[] }
+const { articles } = Astro.props;
+---
+
+<section class="trending container" aria-labelledby="trending-title">
+  <SectionHeader id="trending-title" title="Trending Now" />
+  <ol role="list">
+    {articles.map((a, i) => (
+      <li>
+        <span class="rank" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+        <div class="item">
+          <a class="cat eyebrow" href={`/category/${a.categorySlug}/`}>{a.category}</a>
+          <h3><a href={`/articles/${a.slug}/`}>{a.title}</a></h3>
+          <p class="meta">
+            <time datetime={a.publishedAt}>{formatDate(a.publishedAt)}</time>
+            <span aria-hidden="true">·</span>
+            <span>{a.readingTime} min read</span>
+          </p>
+        </div>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .trending { padding-block: 0 var(--s-12); }
+  ol { display: grid; gap: 0; }
+  li {
+    display: flex;
+    gap: var(--s-4);
+    padding-block: var(--s-4);
+    border-top: 1px solid var(--c-line);
+    min-width: 0;
+  }
+  li:first-child { border-top: 0; padding-top: 0; }
+  .rank {
+    font-family: var(--f-serif);
+    font-size: var(--t-3xl);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--c-accent);
+    opacity: 0.35;
+    min-width: 2.2ch;
+  }
+  .item { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+  .cat:hover { text-decoration: underline; }
+  h3 { font-size: var(--t-lg); color: var(--c-navy); }
+  h3 a:hover { color: var(--c-accent); }
+  .meta { display: flex; gap: var(--s-2); font-size: var(--t-xs); color: var(--c-muted); }
+
+  @media (min-width: 768px) {
+    ol { grid-template-columns: repeat(3, 1fr); }
+    li { border-top: 0; padding: 0 var(--s-6); border-left: 1px solid var(--c-line); }
+    li:first-child { padding-left: 0; border-left: 0; }
+  }
+</style>

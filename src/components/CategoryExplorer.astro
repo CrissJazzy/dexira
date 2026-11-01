@@ -1,0 +1,66 @@
+---
+import { categories } from '../data/site';
+import SectionHeader from './SectionHeader.astro';
+
+// Short descriptors keyed by slug. Names and slugs come from site.ts only.
+const descriptors: Record<string, string> = {
+  technology: 'The tools and platforms shaping modern life.',
+  'artificial-intelligence': 'Machine learning, its promise and its limits.',
+  cybersecurity: 'Protecting people, data and infrastructure.',
+  science: 'Discoveries and the methods behind them.',
+  business: 'Strategy, enterprise and the future of work.',
+  education: 'How people learn, teach and grow.',
+  lifestyle: 'Ideas for living and working well.',
+};
+---
+
+<section class="explore container" aria-labelledby="explore-title">
+  <SectionHeader id="explore-title" title="Explore by Interest" />
+  <ul role="list" class="grid">
+    {categories.map((c, i) => (
+      <li>
+        <a href={`/category/${c.slug}/`}>
+          <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <span class="name">{c.name}</span>
+          <span class="desc">{descriptors[c.slug] ?? ''}</span>
+        </a>
+      </li>
+    ))}
+    <li class="all">
+      <a href="/articles/">
+        <span class="name">Browse all stories <span aria-hidden="true">→</span></span>
+      </a>
+    </li>
+  </ul>
+</section>
+
+<style>
+  .explore { padding-block: 0 var(--s-12); }
+  .grid {
+    display: grid;
+    gap: 1px;
+    background: var(--c-line);
+    border: 1px solid var(--c-line);
+  }
+  li { background: var(--c-bg); min-width: 0; }
+  li a {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    height: 100%;
+    padding: var(--s-6);
+    transition: background var(--ease);
+  }
+  li a:hover { background: var(--c-surface); }
+  .num { font-size: var(--t-xs); font-weight: 600; letter-spacing: 0.08em; color: var(--c-accent); }
+  .name { font-family: var(--f-serif); font-size: var(--t-xl); font-weight: 700; color: var(--c-navy); }
+  li a:hover .name { color: var(--c-accent); }
+  .desc { font-size: var(--t-sm); color: var(--c-ink-soft); }
+  .all a { background: var(--c-navy); justify-content: center; }
+  .all a:hover { background: var(--c-accent-dark); }
+  .all .name { color: #fff; font-size: var(--t-lg); }
+  .all a:hover .name { color: #fff; }
+
+  @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+</style>

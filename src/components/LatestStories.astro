@@ -1,0 +1,27 @@
+---
+import type { Article } from '../data/articles';
+import SectionHeader from './SectionHeader.astro';
+import ArticleCard from './ArticleCard.astro';
+
+interface Props { articles: Article[] }
+const { articles } = Astro.props;
+---
+
+<section id="latest" class="latest container" aria-labelledby="latest-title">
+  <SectionHeader
+    id="latest-title"
+    title="Latest Stories"
+    href="/articles/"
+    linkLabel="View All Stories"
+  />
+  <div class="grid">
+    {articles.map((a) => <ArticleCard article={a} />)}
+  </div>
+</section>
+
+<style>
+  .latest { padding-block: 0 var(--s-12); scroll-margin-top: 8rem; }
+  .grid { display: grid; gap: var(--s-8); }
+  @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); gap: var(--s-12) var(--s-8); } }
+</style>

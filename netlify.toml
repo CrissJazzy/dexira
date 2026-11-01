@@ -1,0 +1,8 @@
+# Netlify build settings for DEXIRA (static Astro site).
+# Base directory is the repository root (Netlify's default), so none is set.
+# The Node version comes from .nvmrc. Environment variables (such as SITE_URL) are set in
+# the Netlify dashboard, never in this file.
+
+[build]
+  command = "npm run build"
+  publish = "dist"

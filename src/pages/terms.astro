@@ -1,0 +1,100 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LegalDoc from '../components/LegalDoc.astro';
+
+/**
+ * MAINTAINER NOTES
+ * - Update `updated` whenever these terms change materially.
+ * - No company name, registration number, address or governing law is stated, because
+ *   none has been confirmed. Add them here once they exist, ideally after legal review.
+ * - This text is a general statement, not legal advice.
+ */
+const updated = '2026-11-01';
+---
+
+<Layout
+  title="Terms and Conditions"
+  description="The terms for using DEXIRA: website use, intellectual property, editorial content, external links, user submissions, liability and changes."
+>
+  <LegalDoc
+    title="Terms and Conditions"
+    intro="These terms describe how you may use the DEXIRA website. Please read them before using it."
+    updated={updated}
+  >
+    <h2 id="acceptance">Acceptance of terms</h2>
+    <p>
+      By accessing or using DEXIRA, you agree to these terms. If you do not agree with them,
+      please do not use the website.
+    </p>
+
+    <h2 id="use">Website use</h2>
+    <p>You may use DEXIRA for lawful, personal and informational purposes. You agree not to:</p>
+    <ul>
+      <li>interfere with the operation or security of the website;</li>
+      <li>attempt to gain unauthorised access to the website or its systems;</li>
+      <li>use automated tools to copy the site at a scale that harms its performance;</li>
+      <li>use the website in a way that breaks the law or the rights of others.</li>
+    </ul>
+
+    <h2 id="intellectual-property">Intellectual property and copyright</h2>
+    <p>
+      The content on DEXIRA, including text, design, logos and illustrations, belongs to DEXIRA
+      or is used with permission, and is protected by copyright and other laws. You may read it,
+      share links to it, and quote short extracts with clear credit and a link back to the
+      original story. You may not copy, republish, sell or distribute substantial parts of the
+      content without our written permission.
+    </p>
+
+    <h2 id="editorial">Editorial content and informational purposes</h2>
+    <p>
+      Our stories are published for general information and discussion. They are not professional
+      advice of any kind, including legal, financial, medical, security or business advice.
+      Before acting on anything you read here, consider seeking advice from a qualified
+      professional. We aim to be accurate and to correct mistakes, but we cannot guarantee that
+      every story is complete or current. Some content on the site may be sample material used
+      while the publication is being developed.
+    </p>
+
+    <h2 id="external-links">External links</h2>
+    <p>
+      DEXIRA may link to websites and services run by others. We include links for convenience
+      and do not control or endorse those sites. We are not responsible for their content or
+      practices, and your use of them is at your own risk.
+    </p>
+
+    <h2 id="submissions">User submissions</h2>
+    <p>
+      You may send us messages, feedback, corrections and story suggestions. By doing so you
+      confirm that what you send is yours to share and does not break the law or anyone else's
+      rights. You allow us to use your feedback and suggestions to improve DEXIRA, without
+      obligation to you. We are not obliged to reply to or publish anything you send. How we
+      handle personal information in submissions is described in the
+      <a href="/privacy/">Privacy Policy</a>.
+    </p>
+
+    <h2 id="liability">Limitation of liability</h2>
+    <p>
+      DEXIRA is provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis. To the
+      fullest extent permitted by law, DEXIRA is not liable for any loss or damage arising from
+      your use of, or inability to use, the website or from reliance on its content. Nothing in
+      these terms limits any liability that cannot be limited by law.
+    </p>
+
+    <h2 id="changes">Changes to terms</h2>
+    <p>
+      We may update these terms from time to time. The date at the top of the page shows when
+      they were last updated. Continuing to use DEXIRA after a change means you accept the
+      updated terms.
+    </p>
+
+    <h2 id="contact">Contact information</h2>
+    <p>
+      Questions about these terms are welcome. Please use the <a href="/contact/">contact page</a>.
+    </p>
+
+    <h2 id="about-terms">About this document</h2>
+    <p>
+      These terms are a general statement and are not legal advice.
+    </p>
+  </LegalDoc>
+</Layout>

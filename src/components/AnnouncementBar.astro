@@ -1,0 +1,22 @@
+---
+---
+<div class="announce">
+  <div class="container announce-inner">
+    <p>Ideas, innovations and perspectives shaping our world.</p>
+    <a href="/#latest">Read the latest <span aria-hidden="true">→</span></a>
+  </div>
+</div>
+
+<style>
+  .announce { background: var(--c-navy); color: #fff; font-size: var(--t-xs); }
+  .announce-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--s-4);
+    padding-block: var(--s-2);
+  }
+  .announce a { font-weight: 600; white-space: nowrap; opacity: 0.9; transition: opacity var(--ease); }
+  .announce a:hover { opacity: 1; text-decoration: underline; }
+  @media (max-width: 520px) { .announce p { display: none; } .announce-inner { justify-content: center; } }
+</style>

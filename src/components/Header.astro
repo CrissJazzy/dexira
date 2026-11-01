@@ -1,0 +1,105 @@
+---
+import { categories } from '../data/site';
+const path = Astro.url.pathname;
+const isActive = (slug: string) => path.startsWith(`/category/${slug}`);
+---
+
+<header class="site-header">
+  <div class="container top">
+    <a href="/" class="logo" aria-label="DEXIRA home">DEXIRA</a>
+    <a href="/search/" class="search" aria-label="Search articles">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+      </svg>
+      <span class="search-text">Search</span>
+    </a>
+  </div>
+
+  <nav aria-label="Primary" class="nav">
+    <ul class="container nav-list">
+      {categories.map((c) => (
+        <li>
+          <a href={`/category/${c.slug}/`} aria-current={isActive(c.slug) ? 'page' : undefined}>
+            {c.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.97);
+    border-bottom: 1px solid var(--c-line);
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-block: var(--s-3);
+  }
+  .logo {
+    font-family: var(--f-serif);
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: 0.14em;
+    color: var(--c-navy);
+  }
+  .search {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-height: 2.75rem; /* 44px touch target */
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--c-line);
+    border-radius: 999px;
+    font-size: var(--t-sm);
+    color: var(--c-ink-soft);
+    transition: border-color var(--ease), color var(--ease);
+  }
+  .search:hover { border-color: var(--c-accent); color: var(--c-accent); }
+  .search-text { display: none; }
+
+  .nav { border-top: 1px solid var(--c-line); }
+  .nav-list {
+    display: flex;
+    gap: var(--s-6);
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  .nav-list::-webkit-scrollbar { display: none; }
+  .nav-list a {
+    display: block;
+    padding-block: var(--s-3);
+    font-size: var(--t-sm);
+    font-weight: 500;
+    color: var(--c-ink-soft);
+    border-bottom: 2px solid transparent;
+    transition: color var(--ease), border-color var(--ease);
+  }
+  .nav-list a:hover { color: var(--c-accent); }
+  .nav-list a[aria-current='page'] { color: var(--c-navy); border-bottom-color: var(--c-accent); }
+  /* The list scrolls sideways, so an outside focus ring would be clipped; draw it inside. */
+  .nav-list a:focus-visible { outline-offset: -2px; }
+
+  /* Narrow screens: the category list scrolls sideways with no scrollbar, so fade the right
+     edge to show there is more. Extra end padding lets the last link scroll clear of the fade. */
+  @media (max-width: 767px) {
+    .nav-list {
+      padding-inline-end: 2.5rem;
+      -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+      mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .search-text { display: inline; }
+    .nav-list { justify-content: center; }
+  }
+</style>

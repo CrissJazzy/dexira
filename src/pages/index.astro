@@ -1,11 +1,46 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import EditorialIntro from '../components/EditorialIntro.astro';
+import FeaturedStory from '../components/FeaturedStory.astro';
+import TrendingStories from '../components/TrendingStories.astro';
+import LatestStories from '../components/LatestStories.astro';
+import CategoryExplorer from '../components/CategoryExplorer.astro';
+import EditorsPicks from '../components/EditorsPicks.astro';
+import Newsletter from '../components/Newsletter.astro';
+import {
+  PLACEHOLDER_CONTENT,
+  getFeaturedArticle,
+  getTrendingArticles,
+  getLatestArticles,
+  getEditorPicks,
+} from '../data/articles';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const [featured, trending, latest, picks] = await Promise.all([
+  getFeaturedArticle(),
+  getTrendingArticles(3),
+  getLatestArticles(6),
+  getEditorPicks(3),
+]);
 ---
 
-<Layout>
-	<Welcome />
+<Layout
+  description="DEXIRA is an independent digital publication exploring the ideas, innovations and discoveries shaping our world."
+  noindex={PLACEHOLDER_CONTENT}
+>
+  <EditorialIntro />
+  {PLACEHOLDER_CONTENT && (
+    <p class="container notice" role="note">
+      Development preview: the stories below are placeholders awaiting real editorial content.
+    </p>
+  )}
+  {featured && <FeaturedStory article={featured} />}
+  {trending.length > 0 && <TrendingStories articles={trending} />}
+  {latest.length > 0 && <LatestStories articles={latest} />}
+  <CategoryExplorer />
+  {picks.length > 0 && <EditorsPicks articles={picks} />}
+  <Newsletter />
 </Layout>
+
+<style>
+  .notice { font-size: var(--t-xs); color: var(--c-muted); padding-bottom: var(--s-4); }
+</style>

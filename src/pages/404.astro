@@ -1,0 +1,71 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { categories } from '../data/site';
+---
+
+<Layout
+  title="Page not found"
+  description="The page you are looking for could not be found. Return to the DEXIRA homepage, search, or explore a category."
+  noindex={true}
+>
+  <div class="container page">
+    <p class="code"><span class="sr">Error </span>404</p>
+    <h1 class="title">We can&rsquo;t find that page</h1>
+    <p class="text">
+      The page may have moved, or the address may be mistyped. You can head back to the homepage,
+      search for a story, or explore a category.
+    </p>
+
+    <p class="actions">
+      <a class="btn" href="/">Back to homepage</a>
+      <a class="link" href="/search/">Search DEXIRA</a>
+    </p>
+
+    <nav class="cats" aria-labelledby="cats-title">
+      <h2 id="cats-title" class="cats-title">Explore categories</h2>
+      <ul class="list" role="list">
+        {categories.map((c) => (
+          <li><a class="pill" href={`/category/${c.slug}/`}>{c.name}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</Layout>
+
+<style>
+  .page { padding-block: var(--s-16) var(--s-12); max-width: 46rem; text-align: center; }
+  .code { font-family: var(--f-serif); font-weight: 700; font-size: clamp(4.5rem, 3rem + 10vw, 8rem); line-height: 1; color: var(--c-accent); }
+  .title { margin-top: var(--s-4); font-size: var(--t-2xl); color: var(--c-navy); }
+  .text { max-width: 34rem; margin: var(--s-4) auto 0; color: var(--c-ink-soft); }
+
+  .actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s-6); margin-top: var(--s-8); }
+  .btn {
+    display: inline-block;
+    padding: var(--s-3) var(--s-6);
+    background: var(--c-accent);
+    color: #fff;
+    border-radius: var(--radius);
+    font-size: var(--t-sm);
+    font-weight: 600;
+    transition: background var(--ease);
+  }
+  .btn:hover { background: var(--c-accent-dark); }
+  .link { font-size: var(--t-sm); font-weight: 600; color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+  .link:hover { color: var(--c-accent-dark); }
+
+  .cats { margin-top: var(--s-12); padding-top: var(--s-8); border-top: 1px solid var(--c-line); }
+  .cats-title { font-size: var(--t-xl); color: var(--c-navy); margin-bottom: var(--s-4); }
+  .list { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s-3); }
+  .pill {
+    display: inline-block;
+    padding: var(--s-2) var(--s-4);
+    border: 1px solid var(--c-line);
+    border-radius: 999px;
+    font-size: var(--t-sm);
+    font-weight: 500;
+    color: var(--c-ink-soft);
+    transition: border-color var(--ease), color var(--ease);
+  }
+  .pill:hover { border-color: var(--c-accent); color: var(--c-accent); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>

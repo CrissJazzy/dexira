@@ -1,0 +1,168 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import { site } from '../data/site';
+import { getCategories } from '../data/categories';
+
+const categories = await getCategories();
+
+const principles = [
+  {
+    name: 'Knowledge',
+    text: 'We start with what is known. Our stories explain the facts, the evidence behind them and the limits of what can be said with confidence.',
+  },
+  {
+    name: 'Innovation',
+    text: 'We follow new tools, methods and ideas, and ask who they help, what they cost and what they change.',
+  },
+  {
+    name: 'Perspective',
+    text: 'We place developments in context, present balanced views and say plainly when a question is still open.',
+  },
+];
+
+const commitments = [
+  { name: 'Informative', text: 'Every story should leave you knowing something specific that you did not know before.' },
+  { name: 'Accessible', text: 'We write in plain language, explain jargon when we use it, and design every page to read well on any screen.' },
+  { name: 'Useful', text: 'Where there is something practical to take away, we say what it is.' },
+  { name: 'Open about mistakes', text: 'If we get something wrong, we want to hear about it and put it right. Use the contact page to send a correction.' },
+];
+---
+
+<Layout
+  title="About"
+  description="DEXIRA is an independent digital publication exploring the ideas, innovations and discoveries shaping our world. Learn what we cover and what we stand for."
+>
+  <div class="container page">
+    <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'About' }]} />
+
+    <header class="intro">
+      <h1 class="name">About DEXIRA</h1>
+      <p class="lead">{site.description}</p>
+      <p class="tagline">{site.tagline}</p>
+    </header>
+
+    <section class="block" aria-labelledby="what-title">
+      <SectionHeader id="what-title" title="What DEXIRA is" />
+      <div class="measure">
+        <p>
+          DEXIRA is a publication for curious readers. We write about technology, artificial
+          intelligence, cybersecurity, science, business, education and lifestyle: the areas where
+          change is most visible in everyday life.
+        </p>
+        <p>
+          DEXIRA is independent. We decide what to cover and how to explain it. The publication is
+          at an early stage, and we are building it carefully, one story at a time.
+        </p>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="purpose-title">
+      <SectionHeader id="purpose-title" title="Why we publish" />
+      <div class="measure">
+        <p>
+          Much of what is written about modern topics is either too technical to be useful or too
+          hurried to be reliable. DEXIRA exists to fill that gap with clear explanations, grounded
+          analysis and practical guidance that help readers understand what is happening and decide
+          what to do about it.
+        </p>
+      </div>
+      <ul class="principles" role="list">
+        {principles.map((p) => (
+          <li class="principle">
+            <h3 class="principle-name">{p.name}</h3>
+            <p class="principle-text">{p.text}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="block" id="coverage" aria-labelledby="coverage-title">
+      <SectionHeader id="coverage-title" title="What we cover" />
+      <ul class="coverage" role="list">
+        {categories.map((c) => (
+          <li>
+            <a class="cover-link" href={`/category/${c.slug}/`}>
+              <span class="cover-name">{c.name}</span>
+              <span class="cover-desc">{c.description}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="block" aria-labelledby="commit-title">
+      <SectionHeader id="commit-title" title="Our commitment to readers" />
+      <ul class="commitments" role="list">
+        {commitments.map((c) => (
+          <li class="commitment">
+            <h3 class="principle-name">{c.name}</h3>
+            <p class="principle-text">{c.text}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="block" aria-labelledby="ambition-title">
+      <SectionHeader id="ambition-title" title="Where we are heading" />
+      <div class="measure">
+        <p>
+          Our ambition is for DEXIRA to become a trusted independent digital publication: a place
+          readers return to because the writing is clear, fair and worth their time. Trust is
+          earned slowly, so we are focused on the quality of each story rather than the speed of
+          publishing.
+        </p>
+        <p class="links">
+          <a href="/">Read the latest stories</a>
+          <a href="/contact/">Get in touch</a>
+        </p>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .page { padding-top: var(--s-6); padding-bottom: var(--s-12); }
+  .intro { margin-top: var(--s-8); max-width: 46rem; }
+  .name { font-size: var(--t-3xl); color: var(--c-navy); }
+  .lead { margin-top: var(--s-4); font-size: var(--t-lg); color: var(--c-ink-soft); }
+  .tagline { margin-top: var(--s-3); font-family: var(--f-serif); font-style: italic; color: var(--c-navy); }
+
+  .block { margin-top: var(--s-12); }
+  .measure { max-width: 46rem; }
+  .measure p { color: var(--c-ink-soft); line-height: 1.75; }
+  .measure p + p { margin-top: var(--s-4); }
+
+  .principles, .commitments { display: grid; gap: var(--s-6); grid-template-columns: minmax(0, 1fr); margin-top: var(--s-8); }
+  .principle, .commitment { min-width: 0; padding-top: var(--s-3); border-top: 1px solid var(--c-line); }
+  .principle-name { font-size: var(--t-lg); color: var(--c-navy); }
+  .principle-text { margin-top: var(--s-2); font-size: var(--t-sm); color: var(--c-ink-soft); }
+  .commitments { margin-top: 0; }
+
+  .coverage {
+    display: grid;
+    gap: 1px;
+    background: var(--c-line);
+    border: 1px solid var(--c-line);
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .coverage li { background: var(--c-bg); min-width: 0; }
+  .cover-link { display: flex; flex-direction: column; gap: var(--s-2); height: 100%; padding: var(--s-6); transition: background var(--ease); }
+  .cover-link:hover { background: var(--c-surface); }
+  .cover-name { font-family: var(--f-serif); font-size: var(--t-xl); font-weight: 700; color: var(--c-navy); }
+  .cover-link:hover .cover-name { color: var(--c-accent); }
+  .cover-desc { font-size: var(--t-sm); color: var(--c-ink-soft); }
+
+  .links { display: flex; flex-wrap: wrap; gap: var(--s-6); margin-top: var(--s-6); }
+  .links a { font-size: var(--t-sm); font-weight: 600; color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+  .links a:hover { color: var(--c-accent-dark); }
+
+  @media (min-width: 640px) {
+    .coverage { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .commitments { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-8); }
+  }
+  @media (min-width: 900px) {
+    .principles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-8); }
+  }
+</style>

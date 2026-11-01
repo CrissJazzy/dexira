@@ -1,0 +1,73 @@
+---
+import type { ContentBlock } from '../data/articles';
+
+interface Props {
+  blocks?: ContentBlock[];
+  html?: string; // raw HTML from a CMS (e.g. WordPress content.rendered); takes priority
+}
+const { blocks = [], html } = Astro.props;
+---
+
+{html ? (
+  <div class="body" set:html={html} />
+) : (
+  <div class="body">
+    {blocks.map((b) => {
+      switch (b.type) {
+        case 'p':
+          return <p>{b.text}</p>;
+        case 'h2':
+          return <h2>{b.text}</h2>;
+        case 'h3':
+          return <h3>{b.text}</h3>;
+        case 'ul':
+          return <ul>{b.items.map((item) => <li>{item}</li>)}</ul>;
+        case 'ol':
+          return <ol>{b.items.map((item) => <li>{item}</li>)}</ol>;
+        case 'quote':
+          return (
+            <blockquote>
+              <p>{b.text}</p>
+              {b.attribution && <footer>{b.attribution}</footer>}
+            </blockquote>
+          );
+        default:
+          return null;
+      }
+    })}
+  </div>
+)}
+
+<style>
+  /* :global() so the same styles apply to CMS-supplied HTML as to rendered blocks */
+  .body {
+    font-family: var(--f-serif);
+    font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.2rem);
+    line-height: 1.75;
+    color: var(--c-ink);
+    overflow-wrap: break-word;
+  }
+  .body :global(p) { margin: 0 0 var(--s-6); }
+  .body :global(h2) { font-size: var(--t-xl); color: var(--c-navy); margin: var(--s-12) 0 var(--s-4); }
+  .body :global(h3) { font-size: var(--t-lg); color: var(--c-navy); margin: var(--s-8) 0 var(--s-3); }
+  .body :global(ul), .body :global(ol) { margin: 0 0 var(--s-6); padding-left: 1.4em; }
+  .body :global(ul) { list-style: disc; }
+  .body :global(ol) { list-style: decimal; }
+  .body :global(li + li) { margin-top: var(--s-2); }
+  .body :global(li::marker) { color: var(--c-accent); }
+  .body :global(blockquote) {
+    margin: var(--s-8) 0;
+    padding: var(--s-2) 0 var(--s-2) var(--s-6);
+    border-left: 3px solid var(--c-accent);
+    font-size: var(--t-xl);
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--c-navy);
+  }
+  .body :global(blockquote p) { margin: 0; }
+  .body :global(blockquote footer) { margin-top: var(--s-3); font-size: var(--t-sm); font-style: normal; color: var(--c-muted); font-family: var(--f-sans); }
+  .body :global(a) { color: var(--c-accent); text-decoration: underline; text-underline-offset: 3px; }
+  .body :global(a:hover) { color: var(--c-accent-dark); }
+  .body :global(img) { max-width: 100%; height: auto; }
+  .body :global(pre) { overflow-x: auto; }
+</style>

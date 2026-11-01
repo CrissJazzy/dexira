@@ -1,0 +1,35 @@
+---
+import { categories } from '../data/site';
+
+interface Props {
+  /** Slug of the category being viewed; it is left out of the list. */
+  current: string;
+}
+const { current } = Astro.props;
+const others = categories.filter((c) => c.slug !== current);
+---
+
+<nav class="cat-nav" aria-labelledby="cat-nav-title">
+  <h2 id="cat-nav-title" class="heading">Explore other categories</h2>
+  <ul class="list">
+    {others.map((c) => (
+      <li><a class="pill" href={`/category/${c.slug}/`}>{c.name}</a></li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .heading { font-size: var(--t-xl); color: var(--c-navy); margin-bottom: var(--s-4); }
+  .list { display: flex; flex-wrap: wrap; gap: var(--s-3); }
+  .pill {
+    display: inline-block;
+    padding: var(--s-2) var(--s-4);
+    border: 1px solid var(--c-line);
+    border-radius: 999px;
+    font-size: var(--t-sm);
+    font-weight: 500;
+    color: var(--c-ink-soft);
+    transition: border-color var(--ease), color var(--ease);
+  }
+  .pill:hover { border-color: var(--c-accent); color: var(--c-accent); }
+</style>

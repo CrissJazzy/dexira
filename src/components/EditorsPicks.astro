@@ -1,0 +1,31 @@
+---
+import type { Article } from '../data/articles';
+import SectionHeader from './SectionHeader.astro';
+import ArticleCard from './ArticleCard.astro';
+
+interface Props { articles: Article[] }
+const { articles } = Astro.props;
+---
+
+<section class="picks" aria-labelledby="picks-title">
+  <div class="container">
+    <SectionHeader id="picks-title" title="Editor's Picks" eyebrow="Curated reading" />
+    <div class="grid">
+      {articles.map((a) => <ArticleCard article={a} variant="pick" />)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .picks { background: var(--c-surface); padding-block: var(--s-12); }
+  .grid { display: grid; gap: var(--s-8); }
+  .grid > :global(*) { padding-top: var(--s-8); border-top: 1px solid var(--c-line); }
+  .grid > :global(*:first-child) { padding-top: 0; border-top: 0; }
+
+  @media (min-width: 900px) {
+    .grid { grid-template-columns: repeat(3, 1fr); gap: 0; }
+    .grid > :global(*) { padding: 0 var(--s-6); border-top: 0; border-left: 1px solid var(--c-line); }
+    .grid > :global(*:first-child) { padding-left: 0; border-left: 0; }
+    .grid > :global(*:last-child) { padding-right: 0; }
+  }
+</style>

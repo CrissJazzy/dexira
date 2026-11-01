@@ -1,0 +1,71 @@
+---
+import { site } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  // Article-only metadata
+  publishedTime?: string;
+  modifiedTime?: string;
+  section?: string;
+  author?: string;
+}
+
+const {
+  title,
+  description = site.description,
+  image,
+  type = 'website',
+  noindex = false,
+  publishedTime,
+  modifiedTime,
+  section,
+  author,
+} = Astro.props;
+
+const fullTitle = title ? `${title} | ${site.name}` : `${site.name} — ${site.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+// Default social image (public/og-default.png), used whenever a page has no usable image of its own.
+// Its size is known, so width/height are only advertised for it, never guessed for other images.
+const DEFAULT_IMAGE = '/og-default.png';
+const DEFAULT_IMAGE_WIDTH = 1200;
+const DEFAULT_IMAGE_HEIGHT = 630;
+const DEFAULT_IMAGE_ALT = `${site.name} — ${site.tagline}`;
+
+// Social crawlers do not render SVG images, so SVG art (e.g. placeholders) is not advertised
+// and the default image is used instead. Any other page-specific image is kept as supplied.
+const pageImageUrl =
+  image && !image.toLowerCase().endsWith('.svg') ? new URL(image, Astro.site).href : undefined;
+const usingDefaultImage = !pageImageUrl;
+const imageUrl = pageImageUrl ?? new URL(DEFAULT_IMAGE, Astro.site).href;
+const isArticle = type === 'article';
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+{isArticle && author && <meta name="author" content={author} />}
+
+<meta property="og:site_name" content={site.name} />
+<meta property="og:type" content={type} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={imageUrl} />
+{usingDefaultImage && <meta property="og:image:type" content="image/png" />}
+{usingDefaultImage && <meta property="og:image:width" content={String(DEFAULT_IMAGE_WIDTH)} />}
+{usingDefaultImage && <meta property="og:image:height" content={String(DEFAULT_IMAGE_HEIGHT)} />}
+{usingDefaultImage && <meta property="og:image:alt" content={DEFAULT_IMAGE_ALT} />}
+{isArticle && publishedTime && <meta property="article:published_time" content={publishedTime} />}
+{isArticle && modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+{isArticle && section && <meta property="article:section" content={section} />}
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+{usingDefaultImage && <meta name="twitter:image:alt" content={DEFAULT_IMAGE_ALT} />}
