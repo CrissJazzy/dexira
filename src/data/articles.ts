@@ -145,10 +145,15 @@ async function fetchJson<T>(url: string): Promise<T> {
     );
   }
 
+  const responseText = await response.text();
   try {
-    return (await response.json()) as T;
+    return JSON.parse(responseText) as T;
   } catch {
-    throw new Error(`DEXIRA WordPress API did not return valid JSON for ${url}.`);
+    const contentType = response.headers.get('content-type') || 'not provided';
+    const preview = responseText.replace(/\\s+/g, ' ').slice(0, 300);
+    throw new Error(
+      `DEXIRA WordPress API returned a non-JSON response for ${url}. Content-Type: ${contentType}. Response preview: ${preview || '[empty response]'}`,
+    );
   }
 }
 
