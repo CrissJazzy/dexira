@@ -5,14 +5,12 @@ import ArticleCard from '../../components/ArticleCard.astro';
 import CategoryFeature from '../../components/CategoryFeature.astro';
 import CategoryNav from '../../components/CategoryNav.astro';
 import { site } from '../../data/site';
-import { PLACEHOLDER_CONTENT } from '../../data/articles';
 import {
   getCategories,
   getArticlesByCategory,
   pickCategoryFeatured,
 } from '../../data/categories';
 
-// One page per configured category (site.ts), including categories with no articles.
 export async function getStaticPaths() {
   const categories = await getCategories();
   return Promise.all(
@@ -25,7 +23,7 @@ export async function getStaticPaths() {
 
 const { category, articles } = Astro.props;
 const featured = pickCategoryFeatured(articles);
-const rest = featured ? articles.filter((a) => a.slug !== featured.slug) : [];
+const rest = featured ? articles.filter((article) => article.slug !== featured.slug) : [];
 const count = articles.length;
 const countLabel = `${count} ${count === 1 ? 'story' : 'stories'}`;
 
@@ -45,10 +43,10 @@ const collectionLd = {
         mainEntity: {
           '@type': 'ItemList',
           numberOfItems: count,
-          itemListElement: articles.map((a, i) => ({
+          itemListElement: articles.map((article, index) => ({
             '@type': 'ListItem',
-            position: i + 1,
-            url: new URL(`/articles/${a.slug}/`, Astro.site).href,
+            position: index + 1,
+            url: new URL(`/articles/${article.slug}/`, Astro.site).href,
           })),
         },
       }
@@ -64,7 +62,6 @@ const breadcrumbLd = {
   ],
 };
 
-// Escape "<" so text can never close the script tag early.
 const toJson = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
 ---
 
@@ -72,7 +69,7 @@ const toJson = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
   title={pageTitle}
   description={category.description}
   image={featured?.image}
-  noindex={PLACEHOLDER_CONTENT}
+  noindex={count === 0}
 >
   <script is:inline slot="head" type="application/ld+json" set:html={toJson(collectionLd)} />
   <script is:inline slot="head" type="application/ld+json" set:html={toJson(breadcrumbLd)} />
@@ -86,12 +83,6 @@ const toJson = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
       {category.intro && <p class="more">{category.intro}</p>}
       <p class="count">{countLabel}</p>
     </header>
-
-    {PLACEHOLDER_CONTENT && count > 0 && (
-      <p class="notice" role="note">
-        Development preview: the stories below are placeholders awaiting real editorial content.
-      </p>
-    )}
 
     {featured && (
       <section class="block" aria-label={`Featured ${category.name} story`}>
@@ -133,22 +124,16 @@ const toJson = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
 
 <style>
   .page { padding-top: var(--s-6); padding-bottom: var(--s-12); }
-
   .intro { margin-top: var(--s-8); max-width: 46rem; }
   .name { font-size: var(--t-3xl); color: var(--c-navy); overflow-wrap: anywhere; }
   .lead { margin-top: var(--s-4); font-size: var(--t-lg); color: var(--c-ink-soft); }
   .more { margin-top: var(--s-3); font-size: var(--t-base); color: var(--c-muted); }
   .count { margin-top: var(--s-4); font-size: var(--t-sm); font-weight: 600; color: var(--c-muted); }
-
-  .notice { margin-top: var(--s-6); font-size: var(--t-xs); color: var(--c-muted); }
-
   .block { margin-top: var(--s-12); }
   .section-title { font-size: var(--t-xl); color: var(--c-navy); margin-bottom: var(--s-6); }
-
   .grid { display: grid; gap: var(--s-8); grid-template-columns: minmax(0, 1fr); }
   @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-
   .empty {
     padding: var(--s-12) var(--gutter);
     background: var(--c-surface);
@@ -169,7 +154,6 @@ const toJson = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
     transition: background var(--ease);
   }
   .btn:hover { background: var(--c-accent-dark); }
-
   .back { margin-top: var(--s-12); text-align: center; }
   .back a { font-size: var(--t-sm); font-weight: 600; color: var(--c-accent); }
   .back a:hover { color: var(--c-accent-dark); text-decoration: underline; }
