@@ -8,13 +8,15 @@ import CategoryExplorer from '../components/CategoryExplorer.astro';
 import EditorsPicks from '../components/EditorsPicks.astro';
 import Newsletter from '../components/Newsletter.astro';
 import {
-  PLACEHOLDER_CONTENT,
+  getAllArticles,
   getFeaturedArticle,
   getTrendingArticles,
   getLatestArticles,
   getEditorPicks,
 } from '../data/articles';
 
+const allArticles = await getAllArticles();
+const hasArticles = allArticles.length > 0;
 const [featured, trending, latest, picks] = await Promise.all([
   getFeaturedArticle(),
   getTrendingArticles(3),
@@ -25,13 +27,14 @@ const [featured, trending, latest, picks] = await Promise.all([
 
 <Layout
   description="DEXIRA is an independent digital publication exploring the ideas, innovations and discoveries shaping our world."
-  noindex={PLACEHOLDER_CONTENT}
+  noindex={!hasArticles}
 >
   <EditorialIntro />
-  {PLACEHOLDER_CONTENT && (
-    <p class="container notice" role="note">
-      Development preview: the stories below are placeholders awaiting real editorial content.
-    </p>
+  {!hasArticles && (
+    <section class="empty container" aria-labelledby="empty-title">
+      <h2 id="empty-title">Our first stories are on the way</h2>
+      <p>DEXIRA is preparing its first collection of stories. Please check back soon.</p>
+    </section>
   )}
   {featured && <FeaturedStory article={featured} />}
   {trending.length > 0 && <TrendingStories articles={trending} />}
@@ -42,5 +45,15 @@ const [featured, trending, latest, picks] = await Promise.all([
 </Layout>
 
 <style>
-  .notice { font-size: var(--t-xs); color: var(--c-muted); padding-bottom: var(--s-4); }
+  .empty {
+    margin-top: var(--s-6);
+    margin-bottom: var(--s-12);
+    padding: var(--s-12) var(--gutter);
+    background: var(--c-surface);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius);
+    text-align: center;
+  }
+  .empty h2 { font-size: var(--t-xl); color: var(--c-navy); }
+  .empty p { max-width: 34rem; margin: var(--s-3) auto 0; color: var(--c-ink-soft); }
 </style>
