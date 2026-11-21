@@ -115,12 +115,12 @@ const plainText = (html: string): string =>
       .replace(/<script[\s\S]*?<\/script>/gi, ' ')
       .replace(/<style[\s\S]*?<\/style>/gi, ' ')
       .replace(/<[^>]*>/g, ' ')
-      .replace(/\\s+/g, ' ')
+      .replace(/\s+/g, ' ')
       .trim(),
   );
 
 const dateOnly = (value?: string): string => {
-  if (!value || !/^\\d{4}-\\d{2}-\\d{2}/.test(value)) {
+  if (!value || !/^\d{4}-\\d{2}-\\d{2}/.test(value)) {
     throw new Error(`WordPress returned an invalid publication date: ${String(value)}`);
   }
   return value.slice(0, 10);
@@ -187,7 +187,7 @@ function mapPost(post: WpPost, termsById: Map<number, WpTerm>): Article {
   const contentHtml = post.content?.rendered ?? '';
   const bodyText = plainText(contentHtml);
   const excerpt = excerptText || bodyText.slice(0, 240);
-  const words = bodyText ? bodyText.split(/\\s+/).filter(Boolean).length : 0;
+  const words = bodyText ? bodyText.split(/\s+/).filter(Boolean).length : 0;
   const publishedAt = dateOnly(post.date);
   const updatedDate = post.modified ? dateOnly(post.modified) : publishedAt;
   const image = media?.source_url || FALLBACK_IMAGES[category.slug].image;
