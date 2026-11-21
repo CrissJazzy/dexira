@@ -120,7 +120,7 @@ const plainText = (html: string): string =>
   );
 
 const dateOnly = (value?: string): string => {
-  if (!value || !/^\d{4}-\\d{2}-\\d{2}/.test(value)) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}/.test(value)) {
     throw new Error(`WordPress returned an invalid publication date: ${String(value)}`);
   }
   return value.slice(0, 10);
