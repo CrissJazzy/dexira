@@ -98,8 +98,8 @@ const FALLBACK_IMAGES: Record<string, { image: string; imageAlt: string }> = {
 
 const decodeEntities = (value: string): string =>
   value
-    .replace(/&#(\\d+);/g, (_match, code: string) => String.fromCodePoint(Number(code)))
-    .replace(/&#x([\\da-f]+);/gi, (_match, code: string) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&#(\d+);/g, (_match, code: string) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([\da-f]+);/gi, (_match, code: string) => String.fromCodePoint(parseInt(code, 16)))
     .replace(/&(amp|lt|gt|quot|apos|nbsp|rsquo|lsquo|rdquo|ldquo|ndash|mdash|hellip);/gi, (match, entity: string) => {
       const entities: Record<string, string> = {
         amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
@@ -112,8 +112,8 @@ const decodeEntities = (value: string): string =>
 const plainText = (html: string): string =>
   decodeEntities(
     html
-      .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')
-      .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
       .replace(/<[^>]*>/g, ' ')
       .replace(/\\s+/g, ' ')
       .trim(),
