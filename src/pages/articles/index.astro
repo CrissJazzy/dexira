@@ -3,24 +3,18 @@ import Layout from '../../layouts/Layout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
 import CategoryNav from '../../components/CategoryNav.astro';
-import { PLACEHOLDER_CONTENT, getAllArticles } from '../../data/articles';
+import { getAllArticles } from '../../data/articles';
 
-// Every article, newest first, from the same data source as the rest of the site.
 const articles = await getAllArticles();
 const count = articles.length;
 const countLabel = `${count} ${count === 1 ? 'story' : 'stories'}`;
-// Robots: while placeholder content is active, keep this page out of search results
-// but let crawlers follow its links. SEO.astro can only emit "noindex, nofollow", so
-// the tag is added through the head slot (same approach as search.astro). The Layout
-// "noindex" prop is deliberately not used here, so only one robots tag is output.
-// Once PLACEHOLDER_CONTENT is false, no robots tag is output and the page is indexable.
 ---
 
 <Layout
   title="All Stories"
   description="Browse every DEXIRA story across technology, artificial intelligence, cybersecurity, science, business, education and lifestyle."
 >
-  {PLACEHOLDER_CONTENT && <meta slot="head" name="robots" content="noindex, follow" />}
+  {count === 0 && <meta slot="head" name="robots" content="noindex, follow" />}
 
   <div class="container page">
     <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'All Stories' }]} />
@@ -33,12 +27,6 @@ const countLabel = `${count} ${count === 1 ? 'story' : 'stories'}`;
       </p>
       <p class="count">{countLabel}</p>
     </header>
-
-    {PLACEHOLDER_CONTENT && count > 0 && (
-      <p class="notice" role="note">
-        Development preview: the stories below are placeholders awaiting real editorial content.
-      </p>
-    )}
 
     {count > 0 ? (
       <section class="block" aria-labelledby="all-stories-title">
@@ -67,23 +55,17 @@ const countLabel = `${count} ${count === 1 ? 'story' : 'stories'}`;
 
 <style>
   .page { padding-top: var(--s-6); padding-bottom: var(--s-12); }
-
   .intro { margin-top: var(--s-8); max-width: 46rem; }
   .name { font-size: var(--t-3xl); color: var(--c-navy); overflow-wrap: anywhere; }
   .lead { margin-top: var(--s-4); font-size: var(--t-lg); color: var(--c-ink-soft); }
   .count { margin-top: var(--s-4); font-size: var(--t-sm); font-weight: 600; color: var(--c-muted); }
-
-  .notice { margin-top: var(--s-6); font-size: var(--t-xs); color: var(--c-muted); }
-
   .block { margin-top: var(--s-12); }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-
   .grid { display: grid; gap: var(--s-8); grid-template-columns: minmax(0, 1fr); }
   @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (min-width: 1024px) {
     .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-12) var(--s-8); }
   }
-
   .empty {
     padding: var(--s-12) var(--gutter);
     background: var(--c-surface);
@@ -104,7 +86,6 @@ const countLabel = `${count} ${count === 1 ? 'story' : 'stories'}`;
     transition: background var(--ease);
   }
   .btn:hover { background: var(--c-accent-dark); }
-
   .back { margin-top: var(--s-12); text-align: center; }
   .back a { font-size: var(--t-sm); font-weight: 600; color: var(--c-accent); }
   .back a:hover { color: var(--c-accent-dark); text-decoration: underline; }
