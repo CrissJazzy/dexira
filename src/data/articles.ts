@@ -63,7 +63,7 @@ interface WpPost {
   };
 }
 
-const WORDPRESS_API = 'https://dexira-editor.site.je/wp-json/wp/v2';
+const WORDPRESS_API = 'https://public-api.wordpress.com/wp/v2/sites/dexiraeditorial.wordpress.com';
 const PER_PAGE = 100;
 const FALLBACK_IMAGES: Record<string, { image: string; imageAlt: string }> = {
   technology: {
