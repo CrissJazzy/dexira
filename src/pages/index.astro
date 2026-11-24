@@ -23,6 +23,11 @@ const [featured, trending, latest, picks] = await Promise.all([
   getLatestArticles(6),
   getEditorPicks(3),
 ]);
+
+const featuredStory = featured ?? latest[0];
+const latestStories = featuredStory
+  ? latest.filter((article) => article.slug !== featuredStory.slug)
+  : latest;
 ---
 
 <Layout
@@ -36,9 +41,9 @@ const [featured, trending, latest, picks] = await Promise.all([
       <p>DEXIRA is preparing its first collection of stories. Please check back soon.</p>
     </section>
   )}
-  {featured && <FeaturedStory article={featured} />}
+  {featuredStory && <FeaturedStory article={featuredStory} />}
   {trending.length > 0 && <TrendingStories articles={trending} />}
-  {latest.length > 0 && <LatestStories articles={latest} />}
+  {latestStories.length > 0 && <LatestStories articles={latestStories} />}
   <CategoryExplorer />
   {picks.length > 0 && <EditorsPicks articles={picks} />}
   <Newsletter />
